@@ -4,4 +4,4 @@
 
 #include "pixel.h"
 
-void render_fractal(std::vector<Pixel> &pixels, int width, int height);
+void render_fractal(std::vector<Pixel> &pixels, unsigned int width, unsigned int height, float scale);

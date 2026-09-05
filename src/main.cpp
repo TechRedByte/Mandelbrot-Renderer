@@ -8,6 +8,7 @@
 
 unsigned int width = 800;
 unsigned int height = 600;
+float scale = 0.005;
 
 int main() {
     if (!init_sdl(width, height)) {
@@ -16,7 +17,7 @@ int main() {
     }
 
     std::vector<Pixel> pixels(width * height);
-    render_fractal(pixels, width, height);
+    render_fractal(pixels, width, height, scale);
     
     SDL_Texture *texture = SDL_CreateTexture(
         renderer,
@@ -52,7 +53,7 @@ int main() {
 
                 pixels.resize(width * height);
 
-                render_fractal(pixels, width, height);
+                render_fractal(pixels, width, height, scale);
 
                 SDL_DestroyTexture(texture);
 

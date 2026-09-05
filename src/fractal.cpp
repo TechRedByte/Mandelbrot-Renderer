@@ -19,12 +19,12 @@ static int _calculate_fractal(double real, double imaginary) {
     return MAX_ITERATIONS;
 }
 
-void render_fractal(std::vector<Pixel> &pixels, int width, int height) {
+void render_fractal(std::vector<Pixel> &pixels, unsigned int width, unsigned int height, float scale) {
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
 
-            double real = -2.5 + x * (3.5 / width);
-            double imaginary = -1.0 + y * (2.0 / height);
+            double real = -0.75 + (x - width / 2.0) * scale;
+            double imaginary = 0.0 + (y - height / 2.0) * scale;
 
             int iterations = _calculate_fractal(real, imaginary);
 
