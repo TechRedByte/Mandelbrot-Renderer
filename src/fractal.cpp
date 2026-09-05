@@ -23,7 +23,7 @@ void render_fractal(std::vector<Pixel> &pixels, int width, int height) {
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
 
-            double real = -2.5 + x *(3.5 / width);
+            double real = -2.5 + x * (3.5 / width);
             double imaginary = -1.0 + y * (2.0 / height);
 
             int iterations = _calculate_fractal(real, imaginary);
