@@ -7,6 +7,9 @@
 #include "fractal.h"
 #include "sdl.h"
 
+static bool _dragging = false;
+static int _last_mouse_x;
+static int _last_mouse_y;
 static bool _got_result = false;
 static std::vector<Pixel> _pixels(dimensions.width * dimensions.height);
 
@@ -53,6 +56,47 @@ int main() {
                 dimensions.height = event.window.data2;
 
                 _pixels.resize(dimensions.width * dimensions.height);
+
+                assign_task(dimensions);
+            }
+
+            if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
+                if (event.button.button == SDL_BUTTON_LEFT) {
+                    _dragging = true;
+                    _last_mouse_x = event.button.x;
+                    _last_mouse_y = event.button.y;
+                }
+            }
+
+            if (event.type == SDL_EVENT_MOUSE_MOTION) {
+                if (_dragging) {
+                    int mouse_x = event.motion.x;
+                    int mouse_y = event.motion.y;
+    
+                    int mouse_delta_x = mouse_x - _last_mouse_x;
+                    int mouse_delta_y = mouse_y - _last_mouse_y;
+    
+                    dimensions.center_x -= mouse_delta_x * dimensions.scale;
+                    dimensions.center_y -= mouse_delta_y * dimensions.scale;
+    
+                    _last_mouse_x = mouse_x;
+                    _last_mouse_y = mouse_y;
+                }
+            }
+            
+            if (event.type == SDL_EVENT_MOUSE_BUTTON_UP) {
+                if (event.button.button == SDL_BUTTON_LEFT) {
+                    _dragging = false;
+                    assign_task(dimensions);
+                }
+            }
+
+            if (event.type == SDL_EVENT_MOUSE_WHEEL) {
+                if (event.wheel.y > 0) {
+                    dimensions.scale *= 0.8;
+                } else if (event.wheel.y < 0) {
+                    dimensions.scale *= 1.25;
+                }
 
                 assign_task(dimensions);
             }

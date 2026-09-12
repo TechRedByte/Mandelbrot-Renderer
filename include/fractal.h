@@ -9,9 +9,9 @@
 struct Dimensions {
     int width = 800;
     int height = 600;
-    float scale = 0.005;
-    float center_x = -0.75;
-    float center_y = 0.0;
+    double scale = 0.003;
+    double center_x = -0.75;
+    double center_y = 0.0;
 };
 
 extern std::mutex mutex;

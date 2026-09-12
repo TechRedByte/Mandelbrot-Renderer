@@ -91,10 +91,10 @@ static int _calculate_pixel(double real, double imaginary) {
 static std::vector<Pixel> _calculate_fractal(Dimensions task, unsigned long my_generation) {
     std::vector<Pixel> pixels(task.width * task.height);
     for (int y = 0; y < task.height; y++) {
-        if (my_generation != _task_generation) {
-            return {};
-        }
         for (int x = 0; x < task.width; x++) {
+            if (my_generation != _task_generation) {
+                return {};
+            }
 
             double real = task.center_x + (x - task.width / 2.0) * task.scale;
             double imaginary = task.center_y + (y - task.height / 2.0) * task.scale;
