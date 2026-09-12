@@ -1,7 +1,26 @@
 #pragma once
 
 #include <vector>
+#include <mutex>
+#include <condition_variable>
 
 #include "pixel.h"
 
-void render_fractal(std::vector<Pixel> &pixels, unsigned int width, unsigned int height, float scale);
+struct Dimensions {
+    int width = 800;
+    int height = 600;
+    float scale = 0.005;
+    float center_x = -0.75;
+    float center_y = 0.0;
+};
+
+extern std::mutex mutex;
+extern std::condition_variable condition;
+extern bool task_available;
+extern bool result_available;
+
+extern Dimensions dimensions;
+extern std::vector<Pixel> pixels;
+
+void initialize_worker();
+void assign_task(Dimensions dimensions);

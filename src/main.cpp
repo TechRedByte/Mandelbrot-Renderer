@@ -1,37 +1,38 @@
 #include <iostream>
 #include <cstdint>
 #include <vector>
+#include <thread>
 
 #include "pixel.h"
 #include "fractal.h"
 #include "sdl.h"
 
-unsigned int width = 800;
-unsigned int height = 600;
-float scale = 0.005;
+static bool _got_result = false;
+static std::vector<Pixel> _pixels(dimensions.width * dimensions.height);
 
 int main() {
-    if (!init_sdl(width, height)) {
+    if (!init_sdl(dimensions.width, dimensions.height)) {
         std::cout << "Failed to initialize SDL.";
         return 0;
     }
 
-    std::vector<Pixel> pixels(width * height);
-    render_fractal(pixels, width, height, scale);
-    
+    initialize_worker();
+
+    assign_task(dimensions);
+
     SDL_Texture *texture = SDL_CreateTexture(
         renderer,
         SDL_PIXELFORMAT_RGB24,
         SDL_TEXTUREACCESS_STREAMING,
-        width,
-        height
+        dimensions.width,
+        dimensions.height
     );
 
     SDL_UpdateTexture(
         texture,
         nullptr,
         pixels.data(),
-        width * sizeof(Pixel)
+        dimensions.width * sizeof(Pixel)
     );
 
     SDL_RenderTexture(renderer, texture, nullptr, nullptr);
@@ -48,34 +49,44 @@ int main() {
             }
 
             if (event.type == SDL_EVENT_WINDOW_RESIZED) {
-                width = event.window.data1;
-                height = event.window.data2;
+                dimensions.width = event.window.data1;
+                dimensions.height = event.window.data2;
 
-                pixels.resize(width * height);
+                _pixels.resize(dimensions.width * dimensions.height);
 
-                render_fractal(pixels, width, height, scale);
-
-                SDL_DestroyTexture(texture);
-
-                texture = SDL_CreateTexture(
-                    renderer,
-                    SDL_PIXELFORMAT_RGB24,
-                    SDL_TEXTUREACCESS_STREAMING,
-                    width,
-                    height
-                );
-
-                SDL_UpdateTexture(
-                    texture,
-                    nullptr,
-                    pixels.data(),
-                    width * sizeof(Pixel)
-                );
-        
-                SDL_RenderTexture(renderer, texture, nullptr, nullptr);
-                SDL_RenderPresent(renderer);
+                assign_task(dimensions);
             }
         }
+
+        {
+        std::lock_guard<std::mutex> lock(mutex);
+        if (result_available) {
+            _pixels = pixels;
+            result_available = false;
+            _got_result = true;
+        }
+        }
+        if (_got_result) {
+            _got_result = false;
+            SDL_DestroyTexture(texture);
+
+            texture = SDL_CreateTexture(
+                renderer,
+                SDL_PIXELFORMAT_RGB24,
+                SDL_TEXTUREACCESS_STREAMING,
+                dimensions.width,
+                dimensions.height
+            );
+
+            SDL_UpdateTexture(
+                texture,
+                nullptr,
+                _pixels.data(),
+                dimensions.width * sizeof(Pixel)
+            );
+        }
+        SDL_RenderTexture(renderer, texture, nullptr, nullptr);
+        SDL_RenderPresent(renderer);
 
         SDL_Delay(16);
     }
