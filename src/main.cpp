@@ -102,7 +102,6 @@ int main() {
                 } else if (event.wheel.y < 0) {
                     dimensions.scale *= 1.25;
                 }
-
                 assign_task(dimensions);
             }
         }
@@ -148,7 +147,7 @@ int main() {
 }
 
 bool init_sdl(unsigned int width, unsigned int height) {
-	if (!SDL_Init(SDL_INIT_VIDEO)) {
+    if (!SDL_Init(SDL_INIT_VIDEO)) {
         return false;
     }
 
@@ -172,5 +171,5 @@ bool init_sdl(unsigned int width, unsigned int height) {
         return false;
     }
 
-	return true;
+    return true;
 }
