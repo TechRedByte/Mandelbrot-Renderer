@@ -4,7 +4,7 @@
 #include <mutex>
 #include <condition_variable>
 
-#include "pixel.h"
+#include "global.h"
 
 struct Dimensions {
     int width = 800;

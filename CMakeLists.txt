@@ -11,7 +11,6 @@ pkg_check_modules(SDL3 REQUIRED sdl3)
 add_executable(mandelbrot
     src/main.cpp
     src/fractal.cpp
-    src/sdl.cpp
 )
 
 target_include_directories(mandelbrot PRIVATE

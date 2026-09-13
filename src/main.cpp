@@ -1,17 +1,22 @@
+#include <SDL3/SDL.h>
 #include <iostream>
 #include <cstdint>
 #include <vector>
 #include <thread>
 
-#include "pixel.h"
 #include "fractal.h"
-#include "sdl.h"
+#include "global.h"
+
+SDL_Window *window = nullptr;
+SDL_Renderer *renderer = nullptr;
 
 static bool _dragging = false;
 static int _last_mouse_x;
 static int _last_mouse_y;
 static bool _got_result = false;
 static std::vector<Pixel> _pixels(dimensions.width * dimensions.height);
+
+bool init_sdl(unsigned int width, unsigned int height);
 
 int main() {
     if (!init_sdl(dimensions.width, dimensions.height)) {
@@ -140,4 +145,32 @@ int main() {
     SDL_Quit();
 
     return 0;
+}
+
+bool init_sdl(unsigned int width, unsigned int height) {
+	if (!SDL_Init(SDL_INIT_VIDEO)) {
+        return false;
+    }
+
+    window = SDL_CreateWindow(
+        "Mandelbrot Renderer",
+        width,
+        height,
+        SDL_WINDOW_RESIZABLE
+    );
+
+    if (window == nullptr) {
+        SDL_Quit();
+        return false;
+    }
+
+    renderer = SDL_CreateRenderer(window, nullptr);
+
+    if (renderer == nullptr) {
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return false;
+    }
+
+	return true;
 }

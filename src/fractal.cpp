@@ -1,13 +1,12 @@
+#include <condition_variable>
 #include <complex>
 #include <vector>
-#include <mutex>
-#include <condition_variable>
 #include <thread>
 #include <atomic>
+#include <mutex>
 
-#include "config.h"
-#include "pixel.h"
 #include "fractal.h"
+#include "global.h"
 
 std::mutex mutex;
 std::condition_variable condition;
