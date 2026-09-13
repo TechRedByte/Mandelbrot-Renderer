@@ -16,7 +16,7 @@ static bool dragging = false;
 static int last_mouse_x;
 static int last_mouse_y;
 static Dimensions dimensions;
-static std::vector<Pixel> _pixels(dimensions.width * dimensions.height);
+static std::vector<Pixel> pixels(dimensions.width * dimensions.height);
 
 bool init_sdl(unsigned int width, unsigned int height);
 void update_texture();
@@ -46,7 +46,7 @@ int main() {
                 dimensions.width = event.window.data1;
                 dimensions.height = event.window.data2;
 
-                _pixels.resize(dimensions.width * dimensions.height);
+                pixels.resize(dimensions.width * dimensions.height);
 
                 assign_task(dimensions);
             }
@@ -95,7 +95,7 @@ int main() {
         }
 
         if (auto result = return_result()) {
-            _pixels = *result;
+            pixels = *result;
             update_texture();
         }
 
@@ -124,7 +124,7 @@ void update_texture() {
     SDL_UpdateTexture(
         texture,
         nullptr,
-        _pixels.data(),
+        pixels.data(),
         dimensions.width * sizeof(Pixel)
     );
 }
