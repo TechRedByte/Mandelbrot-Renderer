@@ -1,4 +1,5 @@
 #include <SDL3/SDL.h>
+#include <optional>
 #include <iostream>
 #include <cstdint>
 #include <vector>
@@ -7,16 +8,19 @@
 #include "fractal.h"
 #include "global.h"
 
-SDL_Window *window = nullptr;
-SDL_Renderer *renderer = nullptr;
+static SDL_Window *window = nullptr;
+static SDL_Renderer *renderer = nullptr;
+static SDL_Texture *texture = nullptr;
 
-static bool _dragging = false;
-static int _last_mouse_x;
-static int _last_mouse_y;
-static bool _got_result = false;
+static bool dragging = false;
+static int last_mouse_x;
+static int last_mouse_y;
+static Dimensions dimensions;
 static std::vector<Pixel> _pixels(dimensions.width * dimensions.height);
 
 bool init_sdl(unsigned int width, unsigned int height);
+void update_texture();
+void update_renderer();
 
 int main() {
     if (!init_sdl(dimensions.width, dimensions.height)) {
@@ -27,24 +31,6 @@ int main() {
     initialize_worker();
 
     assign_task(dimensions);
-
-    SDL_Texture *texture = SDL_CreateTexture(
-        renderer,
-        SDL_PIXELFORMAT_RGB24,
-        SDL_TEXTUREACCESS_STREAMING,
-        dimensions.width,
-        dimensions.height
-    );
-
-    SDL_UpdateTexture(
-        texture,
-        nullptr,
-        pixels.data(),
-        dimensions.width * sizeof(Pixel)
-    );
-
-    SDL_RenderTexture(renderer, texture, nullptr, nullptr);
-    SDL_RenderPresent(renderer);
 
     bool running = true;
 
@@ -67,32 +53,33 @@ int main() {
 
             if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
                 if (event.button.button == SDL_BUTTON_LEFT) {
-                    _dragging = true;
-                    _last_mouse_x = event.button.x;
-                    _last_mouse_y = event.button.y;
+                    dragging = true;
+                    last_mouse_x = event.button.x;
+                    last_mouse_y = event.button.y;
                 }
             }
 
             if (event.type == SDL_EVENT_MOUSE_MOTION) {
-                if (_dragging) {
+                if (dragging) {
                     int mouse_x = event.motion.x;
                     int mouse_y = event.motion.y;
     
-                    int mouse_delta_x = mouse_x - _last_mouse_x;
-                    int mouse_delta_y = mouse_y - _last_mouse_y;
+                    int mouse_delta_x = mouse_x - last_mouse_x;
+                    int mouse_delta_y = mouse_y - last_mouse_y;
     
                     dimensions.center_x -= mouse_delta_x * dimensions.scale;
                     dimensions.center_y -= mouse_delta_y * dimensions.scale;
     
-                    _last_mouse_x = mouse_x;
-                    _last_mouse_y = mouse_y;
+                    last_mouse_x = mouse_x;
+                    last_mouse_y = mouse_y;
+
+                    assign_task(dimensions);
                 }
             }
             
             if (event.type == SDL_EVENT_MOUSE_BUTTON_UP) {
                 if (event.button.button == SDL_BUTTON_LEFT) {
-                    _dragging = false;
-                    assign_task(dimensions);
+                    dragging = false;
                 }
             }
 
@@ -102,40 +89,17 @@ int main() {
                 } else if (event.wheel.y < 0) {
                     dimensions.scale *= 1.25;
                 }
+
                 assign_task(dimensions);
             }
         }
 
-        {
-        std::lock_guard<std::mutex> lock(mutex);
-        if (result_available) {
-            _pixels = pixels;
-            result_available = false;
-            _got_result = true;
+        if (auto result = return_result()) {
+            _pixels = *result;
+            update_texture();
         }
-        }
-        if (_got_result) {
-            _got_result = false;
-            SDL_DestroyTexture(texture);
 
-            texture = SDL_CreateTexture(
-                renderer,
-                SDL_PIXELFORMAT_RGB24,
-                SDL_TEXTUREACCESS_STREAMING,
-                dimensions.width,
-                dimensions.height
-            );
-
-            SDL_UpdateTexture(
-                texture,
-                nullptr,
-                _pixels.data(),
-                dimensions.width * sizeof(Pixel)
-            );
-        }
-        SDL_RenderTexture(renderer, texture, nullptr, nullptr);
-        SDL_RenderPresent(renderer);
-
+        update_renderer();
         SDL_Delay(16);
     }
 
@@ -144,6 +108,30 @@ int main() {
     SDL_Quit();
 
     return 0;
+}
+
+void update_texture() {
+    SDL_DestroyTexture(texture);
+
+    texture = SDL_CreateTexture(
+        renderer,
+        SDL_PIXELFORMAT_RGB24,
+        SDL_TEXTUREACCESS_STREAMING,
+        dimensions.width,
+        dimensions.height
+    );
+
+    SDL_UpdateTexture(
+        texture,
+        nullptr,
+        _pixels.data(),
+        dimensions.width * sizeof(Pixel)
+    );
+}
+
+void update_renderer() {
+    SDL_RenderTexture(renderer, texture, nullptr, nullptr);
+    SDL_RenderPresent(renderer);
 }
 
 bool init_sdl(unsigned int width, unsigned int height) {
