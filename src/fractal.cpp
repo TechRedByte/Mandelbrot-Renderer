@@ -14,8 +14,7 @@ static std::condition_variable condition;
 static bool task_available = false;
 static bool result_available = false;
 static std::vector<Pixel> pixels;
-static Dimensions task_buffer1;
-static Dimensions task_buffer2;
+static Dimensions task_buffer;
 static std::thread worker_thread;
 static std::atomic<unsigned long> task_generation = 0;
 
@@ -31,7 +30,7 @@ void assign_task(Dimensions task) {
     {
         std::lock_guard<std::mutex> lock(mutex);
 
-        task_buffer1 = task;
+        task_buffer = task;
 
         task_available = true;
         task_generation++;
@@ -54,6 +53,7 @@ std::optional<std::vector<Pixel>> return_result() {
 static void _worker() {
     while (true) {
         unsigned long my_generation = 0;
+        Dimensions task;
 
         {
             std::unique_lock<std::mutex> lock(mutex);
@@ -62,12 +62,12 @@ static void _worker() {
                 return task_available;
             });
 
-            task_buffer2 = task_buffer1;
+            task = task_buffer;
             my_generation = task_generation;
             task_available = false;
         }
 
-        pixels = _calculate_fractal(task_buffer2, my_generation);
+        pixels = _calculate_fractal(task, my_generation);
 
         if (!pixels.empty()) {
             std::lock_guard<std::mutex> lock(mutex);
