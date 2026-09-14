@@ -42,6 +42,7 @@ void assign_task(Dimensions task) {
 
 std::optional<std::vector<Pixel>> return_result() {
     std::lock_guard<std::mutex> lock(mutex);
+
     if (result_available) {
         result_available = false;
         return pixels;
@@ -66,13 +67,12 @@ static void _worker() {
             task_available = false;
         }
 
-        std::vector<Pixel> _result_buffer = _calculate_fractal(task_buffer2, my_generation);
+        pixels = _calculate_fractal(task_buffer2, my_generation);
 
-        if (!_result_buffer.empty()) {
+        if (!pixels.empty()) {
             std::lock_guard<std::mutex> lock(mutex);
 
             if (my_generation == task_generation) {
-                pixels = std::move(_result_buffer);
                 result_available = true;
             }
         }
