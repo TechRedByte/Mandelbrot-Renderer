@@ -18,9 +18,9 @@ static int last_mouse_y;
 static Dimensions dimensions;
 static std::vector<Pixel> pixels(dimensions.width * dimensions.height);
 
-bool init_sdl(unsigned int width, unsigned int height);
-void update_texture();
-void update_renderer();
+static bool init_sdl(unsigned int width, unsigned int height);
+static void update_texture();
+static void update_renderer();
 
 int main() {
     if (!init_sdl(dimensions.width, dimensions.height)) {
@@ -110,7 +110,7 @@ int main() {
     return 0;
 }
 
-void update_texture() {
+static void update_texture() {
     SDL_DestroyTexture(texture);
 
     texture = SDL_CreateTexture(
@@ -129,12 +129,12 @@ void update_texture() {
     );
 }
 
-void update_renderer() {
+static void update_renderer() {
     SDL_RenderTexture(renderer, texture, nullptr, nullptr);
     SDL_RenderPresent(renderer);
 }
 
-bool init_sdl(unsigned int width, unsigned int height) {
+static bool init_sdl(unsigned int width, unsigned int height) {
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         return false;
     }
