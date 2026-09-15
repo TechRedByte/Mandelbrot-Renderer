@@ -3,7 +3,6 @@
 #include <complex>
 #include <vector>
 #include <thread>
-#include <atomic>
 #include <mutex>
 
 #include "fractal.h"
@@ -16,11 +15,9 @@ static bool result_available = false;
 static std::vector<Pixel> pixels;
 static Dimensions task_buffer;
 static std::thread worker_thread;
-static std::atomic<unsigned long> task_generation = 0;
 
 static void _worker();
 static int _calculate_pixel(double real, double imaginary);
-static std::vector<Pixel> _calculate_fractal(Dimensions task, unsigned long my_generation);
 
 void initialize_worker() {
     worker_thread = std::thread(_worker);
@@ -33,7 +30,6 @@ void assign_task(Dimensions task) {
         task_buffer = task;
 
         task_available = true;
-        task_generation++;
     }
 
     condition.notify_one();
@@ -52,9 +48,7 @@ std::optional<std::vector<Pixel>> return_result() {
 
 static void _worker() {
     while (true) {
-        unsigned long my_generation = 0;
         Dimensions task;
-
         {
             std::unique_lock<std::mutex> lock(mutex);
 
@@ -63,18 +57,14 @@ static void _worker() {
             });
 
             task = task_buffer;
-            my_generation = task_generation;
             task_available = false;
         }
 
-        pixels = _calculate_fractal(task, my_generation);
-
-        if (!pixels.empty()) {
+        std::vector<Pixel> result = calculate_fractal(task);
+        {
             std::lock_guard<std::mutex> lock(mutex);
-
-            if (my_generation == task_generation) {
-                result_available = true;
-            }
+            pixels = std::move(result);
+            result_available = true;
         }
     }
 }
@@ -93,14 +83,10 @@ static int _calculate_pixel(double real, double imaginary) {
     return MAX_ITERATIONS;
 }
 
-static std::vector<Pixel> _calculate_fractal(Dimensions task, unsigned long my_generation) {
+std::vector<Pixel> calculate_fractal(Dimensions task) {
     std::vector<Pixel> pixels(task.width * task.height);
     for (int y = 0; y < task.height; y++) {
         for (int x = 0; x < task.width; x++) {
-            if (my_generation != task_generation) {
-                return {};
-            }
-
             double real = task.center_x + (x - task.width / 2.0) * task.scale;
             double imaginary = task.center_y + (y - task.height / 2.0) * task.scale;
 
