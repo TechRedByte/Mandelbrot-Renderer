@@ -84,10 +84,18 @@ int main() {
             }
 
             if (event.type == SDL_EVENT_MOUSE_WHEEL) {
-                if (event.wheel.y > 0) {
-                    dimensions.scale *= 0.8;
-                } else if (event.wheel.y < 0) {
-                    dimensions.scale *= 1.25;
+                if (event.wheel.y > 0) { // Zooming in
+                    float zoom_factor = 0.8;
+
+                    dimensions.center_x += (event.wheel.mouse_x - dimensions.width / 2) * dimensions.scale * (1.0 - zoom_factor);
+                    dimensions.center_y += (event.wheel.mouse_y - dimensions.height / 2) * dimensions.scale * (1.0 - zoom_factor);
+                    dimensions.scale *= zoom_factor;
+                } else if (event.wheel.y < 0) { // Zooming out
+                    float zoom_factor = 1.25;
+
+                    dimensions.center_x += (event.wheel.mouse_x - dimensions.width / 2) * dimensions.scale * (1.0 - zoom_factor);
+                    dimensions.center_y += (event.wheel.mouse_y - dimensions.height / 2) * dimensions.scale * (1.0 - zoom_factor);
+                    dimensions.scale *= zoom_factor;
                 }
 
                 assign_task(dimensions);
