@@ -29,4 +29,4 @@ Contributions, ideas, and feedback would make my day. ☺️
 
 This project is actively being developed, so things may change frequently.
 
-For development progress and things I've learned along the way, see the [Development Log](DEVELOPMENT_LOG.md).
+For development progress and things I've learned along the way, see the [Development Log](dev-log.md).
