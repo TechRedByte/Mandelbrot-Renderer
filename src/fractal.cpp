@@ -85,12 +85,18 @@ static int _calculate_pixel(double real, double imaginary) {
 
 std::vector<Pixel> calculate_fractal(Dimensions task) {
     std::vector<Pixel> pixels(task.width * task.height);
+    std::vector<double> reals(task.width);
+    std::vector<double> imaginaries(task.height);
+    for (int x = 0; x < task.width; x++) {
+        reals[x] = task.center_x + (x - task.width / 2.0) * task.scale;
+    }
+    for (int y = 0; y < task.height; y++) {
+        imaginaries[y] = task.center_y + (y - task.height / 2.0) * task.scale;
+    }
+
     for (int y = 0; y < task.height; y++) {
         for (int x = 0; x < task.width; x++) {
-            double real = task.center_x + (x - task.width / 2.0) * task.scale;
-            double imaginary = task.center_y + (y - task.height / 2.0) * task.scale;
-
-            int iterations = _calculate_pixel(real, imaginary);
+            int iterations = _calculate_pixel(reals[x], imaginaries[y]);
 
             Pixel &pixel = pixels[y * task.width + x];
 
