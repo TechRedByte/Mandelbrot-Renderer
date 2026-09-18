@@ -7,7 +7,7 @@
 
 #include "global.h"
 
-void initialize_worker();
+void initialize_workers();
 void assign_task(Dimensions dimensions);
 std::optional<std::vector<Pixel>> return_result();
 std::vector<Pixel> calculate_fractal(Dimensions task);
