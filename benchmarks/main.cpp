@@ -76,7 +76,7 @@ int main() {
             auto end = std::chrono::steady_clock::now();
             durations.push_back(std::chrono::duration_cast<std::chrono::microseconds>(end - start).count());
         }
-        
+
         means.push_back(mean(durations));
         medians.push_back(median(durations));
         minimums.push_back(*std::min_element(durations.begin(), durations.end()));

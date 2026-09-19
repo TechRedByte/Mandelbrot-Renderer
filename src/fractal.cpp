@@ -19,7 +19,7 @@ struct PixelTask {
 };
 
 static std::mutex result_mutex;
-static std::vector<Pixel> result;
+static Result result;
 static bool result_available = false;
 
 static std::condition_variable task_available_condition;
@@ -59,7 +59,7 @@ void assign_task(Dimensions task) {
     task_available_condition.notify_one();
 }
 
-std::optional<std::vector<Pixel>> return_result() {
+std::optional<Result> return_result() {
     std::lock_guard<std::mutex> lock(result_mutex);
     if (result_available) {
         result_available = false;
@@ -86,7 +86,8 @@ static void _worker() {
         std::vector<Pixel> result_buffer = calculate_fractal(task);
         {
             std::lock_guard<std::mutex> lock(result_mutex);
-            result = std::move(result_buffer);
+            result.dimensions = task;
+            result.pixels = std::move(result_buffer);
             result_available = true;
         }
     }
@@ -158,24 +159,24 @@ static void _calculate_region(PixelTask task) {
         for (int x = 0; x < reals.size(); x++) {
             std::complex<double> c(reals[x], imaginaries[y]);
             std::complex<double> z(0.0, 0.0);
-        
+
             unsigned int iteration;
             for (iteration = 0; iteration < MAX_ITERATIONS; iteration++) {
                 z = z * z + c;
-        
+
                 if (std::abs(z) > 2.0) {
                     break;
                 }
             }
             Pixel &pixel = pixels[(y + task.start_y) * task.dimensions.width + (x + task.start_x)];
-            
+
             if (iteration == MAX_ITERATIONS) {
                 pixel.r = 0;
                 pixel.g = 0;
                 pixel.b = 0;
             } else {
                 uint8_t brightness = iteration * 255 / MAX_ITERATIONS;
-            
+
                 pixel.r = brightness;
                 pixel.g = brightness;
                 pixel.b = brightness;

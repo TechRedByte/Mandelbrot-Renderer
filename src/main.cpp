@@ -63,20 +63,20 @@ int main() {
                 if (dragging) {
                     int mouse_x = event.motion.x;
                     int mouse_y = event.motion.y;
-    
+
                     int mouse_delta_x = mouse_x - last_mouse_x;
                     int mouse_delta_y = mouse_y - last_mouse_y;
-    
+
                     dimensions.center_x -= mouse_delta_x * dimensions.scale;
                     dimensions.center_y -= mouse_delta_y * dimensions.scale;
-    
+
                     last_mouse_x = mouse_x;
                     last_mouse_y = mouse_y;
 
                     assign_task(dimensions);
                 }
             }
-            
+
             if (event.type == SDL_EVENT_MOUSE_BUTTON_UP) {
                 if (event.button.button == SDL_BUTTON_LEFT) {
                     dragging = false;
@@ -103,8 +103,10 @@ int main() {
         }
 
         if (auto result = return_result()) {
-            pixels = *result;
-            update_texture();
+            if (result->dimensions == dimensions) {
+                pixels = result->pixels;
+                update_texture();
+            }
         }
 
         update_renderer();
