@@ -34,7 +34,7 @@ static std::mutex tasks_remaining_mutex;
 static std::condition_variable task_remaining_condition;
 static unsigned int tasks_remaining;
 
-unsigned int regions_rows_collums = std::sqrt(NUM_REGIONS);
+unsigned int regions_per_side = std::sqrt(NUM_REGIONS);
 static std::vector<std::thread> calculator_threads;
 static std::thread worker_thread;
 static std::vector<Pixel> pixels;
@@ -100,13 +100,16 @@ std::vector<Pixel> calculate_fractal(Dimensions task) {
 
     tasks_remaining = NUM_REGIONS;
     worker_task.dimensions = task;
-    for (int region_y = 0; region_y < regions_rows_collums; region_y++) {
-        for (int region_x = 0; region_x < regions_rows_collums; region_x++) {
-            std::unique_lock<std::mutex> lock(task_queue_mutex);
-            worker_task.start_x = task.width / regions_rows_collums * region_x;
-            worker_task.end_x = task.width / regions_rows_collums * (region_x + 1);
-            worker_task.start_y = task.height / regions_rows_collums * region_y;
-            worker_task.end_y = task.height / regions_rows_collums * (region_y + 1);
+    for (int region_y = 0; region_y < regions_per_side; region_y++) {
+        for (int region_x = 0; region_x < regions_per_side; region_x++) {
+            std::lock_guard<std::mutex> lock(task_queue_mutex);
+
+            worker_task.start_x = task.width * region_x / regions_per_side;
+            worker_task.end_x = task.width * (region_x + 1) / regions_per_side;
+    
+            worker_task.start_y = task.height * region_y / regions_per_side;
+            worker_task.end_y = task.height * (region_y + 1) / regions_per_side;
+    
             task_queue.push(worker_task);
         }
     }
@@ -137,7 +140,7 @@ static void _calculator_worker() {
         }
         _calculate_region(task);
         {
-            std::unique_lock<std::mutex> lock(tasks_remaining_mutex);
+            std::lock_guard<std::mutex> lock(tasks_remaining_mutex);
             tasks_remaining--;
             if (tasks_remaining == 0) {
                 task_remaining_condition.notify_one();
