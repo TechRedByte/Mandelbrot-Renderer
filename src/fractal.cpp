@@ -1,4 +1,5 @@
 #include <condition_variable>
+#include <algorithm>
 #include <optional>
 #include <complex>
 #include <vector>
@@ -34,7 +35,7 @@ static std::mutex tasks_remaining_mutex;
 static std::condition_variable task_remaining_condition;
 static unsigned int tasks_remaining;
 
-unsigned int regions_per_side = std::sqrt(NUM_REGIONS);
+const unsigned int regions_per_side = std::sqrt(NUM_REGIONS);
 static std::vector<std::thread> calculator_threads;
 static std::thread worker_thread;
 static std::vector<Pixel> pixels;
@@ -42,6 +43,8 @@ static std::vector<Pixel> pixels;
 static void _worker();
 static void _calculate_region(PixelTask task);
 static void _calculator_worker();
+static double _calculate_pixel(double real, double imaginary);
+static void _color_pixel(Pixel &pixel, double smooth_iteration);
 
 void initialize_workers() {
     worker_thread = std::thread(_worker);
@@ -160,30 +163,44 @@ static void _calculate_region(PixelTask task) {
     }
     for (int y = 0; y < imaginaries.size(); y++) {
         for (int x = 0; x < reals.size(); x++) {
-            std::complex<double> c(reals[x], imaginaries[y]);
-            std::complex<double> z(0.0, 0.0);
-
-            unsigned int iteration;
-            for (iteration = 0; iteration < MAX_ITERATIONS; iteration++) {
-                z = z * z + c;
-
-                if (std::abs(z) > 2.0) {
-                    break;
-                }
-            }
-            Pixel &pixel = pixels[(y + task.start_y) * task.dimensions.width + (x + task.start_x)];
-
-            if (iteration == MAX_ITERATIONS) {
-                pixel.r = 0;
-                pixel.g = 0;
-                pixel.b = 0;
-            } else {
-                uint8_t brightness = iteration * 255 / MAX_ITERATIONS;
-
-                pixel.r = brightness;
-                pixel.g = brightness;
-                pixel.b = brightness;
-            }
+            _color_pixel(
+                pixels[(y + task.start_y) * task.dimensions.width + (x + task.start_x)],
+                _calculate_pixel(reals[x], imaginaries[y])
+            );
         }
+    }
+}
+
+static double _calculate_pixel(double real, double imaginary) {
+    std::complex<double> c(real, imaginary);
+    std::complex<double> z(0.0, 0.0);
+
+    unsigned int iteration;
+    for (iteration = 0; iteration < MAX_ITERATIONS; iteration++) {
+        z = z * z + c;
+
+        if (std::abs(z) > 2.0) {
+            break;
+        }
+    }
+    if (iteration == MAX_ITERATIONS) {
+        return MAX_ITERATIONS;
+    }
+
+    return iteration + 1 - std::log(std::log(std::abs(z))) / std::log(2.0);
+}
+
+static void _color_pixel(Pixel &pixel, double smooth_iteration) {
+    if (smooth_iteration >= MAX_ITERATIONS) {
+        pixel.r = 0;
+        pixel.g = 0;
+        pixel.b = 0;
+    } else {
+        double brightness = smooth_iteration * 255 / MAX_ITERATIONS;
+        brightness = std::clamp(brightness, 0.0, 255.0);
+
+        pixel.r = static_cast<uint8_t>(brightness);
+        pixel.g = static_cast<uint8_t>(brightness);
+        pixel.b = static_cast<uint8_t>(brightness);
     }
 }

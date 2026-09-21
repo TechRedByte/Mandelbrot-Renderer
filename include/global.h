@@ -3,8 +3,8 @@
 #include <cstdint>
 #include <vector>
 
-constexpr unsigned int MAX_ITERATIONS = 255;
-constexpr unsigned int WORKER_THREADS = 10;
+constexpr unsigned int MAX_ITERATIONS = 256;
+constexpr unsigned int WORKER_THREADS = 12;
 constexpr unsigned int NUM_REGIONS = 361; // Must be a whole square number
 
 struct Pixel {
