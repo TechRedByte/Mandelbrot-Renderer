@@ -179,7 +179,7 @@ static double _calculate_pixel(double real, double imaginary) {
     for (iteration = 0; iteration < MAX_ITERATIONS; iteration++) {
         z = z * z + c;
 
-        if (std::abs(z) > 2.0) {
+        if (std::norm(z) > 4.0) {
             break;
         }
     }
