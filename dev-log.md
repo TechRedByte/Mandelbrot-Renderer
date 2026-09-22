@@ -1,6 +1,6 @@
 # Development Log
 
-## 2026.09.14
+## 14.09.2026
 
 ### Current state
 
@@ -20,3 +20,28 @@
 
 - Make the fractal calculation multithreaded
 - Precompute coordinate arrays more efficiently
+
+## 22.09.2026
+
+### What I did
+
+- Created benchamrk program to measure mean time
+- Made fractal calculation multithreaded
+- Removed task cancellation because it complicated things too much and was also bad for performance
+- Made zooming centered on mouse
+- Made coloring use smooth iteration to hide the iteration bands a little bit
+- Optimized by removing unnecessary square root when iterating
+
+These changes made the renderer 16× faster in my benchmark.
+
+### Chalenges I encountered
+
+- The image was glitching when resizing the window because of a race condition, so it would display an old image with the new dimensions
+- When splitting the image into regions it would leave a black margin on the left and bottom side of the image, because of a rounding error
+
+### Next up
+
+- Rewrite coloring algorithm to use a cycling palette, so it could display shapes to infinity
+- Dynamic max iterations, so it would compute more as needed when zooming in
+- Automatic worker threads number based on the cpu threads
+- Further optimizations
