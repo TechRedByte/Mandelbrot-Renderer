@@ -8,6 +8,7 @@
 #include <queue>
 #include <cmath>
 
+#include "palette.h"
 #include "fractal.h"
 #include "global.h"
 
@@ -43,7 +44,7 @@ static std::vector<Pixel> pixels;
 static void _worker();
 static void _calculate_region(PixelTask task);
 static void _calculator_worker();
-static double _calculate_pixel(double real, double imaginary);
+static double _calculate_iterations(double real, double imaginary);
 static void _color_pixel(Pixel &pixel, double smooth_iteration);
 
 void initialize_workers() {
@@ -165,13 +166,13 @@ static void _calculate_region(PixelTask task) {
         for (int x = 0; x < reals.size(); x++) {
             _color_pixel(
                 pixels[(y + task.start_y) * task.dimensions.width + (x + task.start_x)],
-                _calculate_pixel(reals[x], imaginaries[y])
+                _calculate_iterations(reals[x], imaginaries[y])
             );
         }
     }
 }
 
-static double _calculate_pixel(double real, double imaginary) {
+static double _calculate_iterations(double real, double imaginary) {
     std::complex<double> c(real, imaginary);
     std::complex<double> z(0.0, 0.0);
 
@@ -196,11 +197,6 @@ static void _color_pixel(Pixel &pixel, double smooth_iteration) {
         pixel.g = 0;
         pixel.b = 0;
     } else {
-        double brightness = smooth_iteration * 255 / MAX_ITERATIONS;
-        brightness = std::clamp(brightness, 0.0, 255.0);
-
-        pixel.r = static_cast<uint8_t>(brightness);
-        pixel.g = static_cast<uint8_t>(brightness);
-        pixel.b = static_cast<uint8_t>(brightness);
+        pixel = get_color(smooth_iteration);
     }
 }

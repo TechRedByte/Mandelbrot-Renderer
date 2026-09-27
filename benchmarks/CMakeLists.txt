@@ -9,6 +9,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 add_executable(benchmark
     main.cpp
     ../src/fractal.cpp
+    ../src/palette.cpp
 )
 
 target_include_directories(benchmark PRIVATE

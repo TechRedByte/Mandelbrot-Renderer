@@ -3,10 +3,6 @@
 #include <cstdint>
 #include <vector>
 
-constexpr unsigned int MAX_ITERATIONS = 256;
-constexpr unsigned int WORKER_THREADS = 12;
-constexpr unsigned int NUM_REGIONS = 361; // Must be a whole square number
-
 struct Pixel {
     uint8_t r;
     uint8_t g;
@@ -22,10 +18,10 @@ struct Dimensions {
 
     bool operator==(const Dimensions& other) const {
         return width == other.width &&
-               height == other.height &&
-               scale == other.scale &&
-               center_x == other.center_x &&
-               center_y == other.center_y;
+            height == other.height &&
+            scale == other.scale &&
+            center_x == other.center_x &&
+            center_y == other.center_y;
     }
 };
 
@@ -33,3 +29,8 @@ struct Result {
     Dimensions dimensions;
     std::vector<Pixel> pixels;
 };
+
+constexpr unsigned int MAX_ITERATIONS = 256;
+constexpr unsigned int WORKER_THREADS = 12;
+constexpr unsigned int NUM_REGIONS = 361; // Must be a whole square number
+constexpr double PALETTE_DENSITY = 255.0;
