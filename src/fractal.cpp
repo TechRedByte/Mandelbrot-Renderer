@@ -12,7 +12,7 @@
 #include "fractal.h"
 #include "global.h"
 
-struct PixelTask {
+struct RegionTask {
     Dimensions dimensions;
     unsigned int start_x;
     unsigned int end_x;
@@ -30,7 +30,7 @@ static bool task_available = false;
 
 static std::mutex task_queue_mutex;
 static std::condition_variable task_queue_condition;
-static std::queue<PixelTask> task_queue;
+static std::queue<RegionTask> task_queue;
 
 static std::mutex tasks_remaining_mutex;
 static std::condition_variable task_remaining_condition;
@@ -42,7 +42,7 @@ static std::thread worker_thread;
 static std::vector<Pixel> pixels;
 
 static void _worker();
-static void _calculate_region(PixelTask task);
+static void _calculate_region(RegionTask task);
 static void _calculator_worker();
 static double _calculate_iterations(double real, double imaginary);
 static void _color_pixel(Pixel &pixel, double smooth_iteration);
@@ -105,7 +105,7 @@ static void _worker() {
 std::vector<Pixel> calculate_fractal(Dimensions task) {
     pixels.clear();
     pixels.resize(task.width * task.height);
-    PixelTask worker_task;
+    RegionTask worker_task;
 
     tasks_remaining = NUM_REGIONS;
     worker_task.dimensions = task;
@@ -136,7 +136,7 @@ std::vector<Pixel> calculate_fractal(Dimensions task) {
 
 static void _calculator_worker() {
     while (true) {
-        PixelTask task;
+        RegionTask task;
         {
             std::unique_lock<std::mutex> lock(task_queue_mutex);
 
@@ -158,7 +158,7 @@ static void _calculator_worker() {
     }
 }
 
-static void _calculate_region(PixelTask task) {
+static void _calculate_region(RegionTask task) {
     std::vector<double> imaginaries(task.end_y - task.start_y);
     std::vector<double> reals(task.end_x - task.start_x);
     for (int y = task.start_y; y < task.end_y; y++) {
