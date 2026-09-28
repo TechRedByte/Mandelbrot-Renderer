@@ -180,7 +180,7 @@ static double _calculate_iterations(double real, double imaginary) {
     for (iteration = 0; iteration < MAX_ITERATIONS; iteration++) {
         z = z * z + c;
 
-        if (std::norm(z) > 4.0) {
+        if (std::norm(z) > 128.0) {
             break;
         }
     }
@@ -188,7 +188,7 @@ static double _calculate_iterations(double real, double imaginary) {
         return MAX_ITERATIONS;
     }
 
-    return iteration + 1 - std::log(std::log(std::abs(z))) / std::log(2.0);
+    return iteration + 1 - std::log((std::log(std::abs(z)) / 2) / std::log(2)) / std::log(2);
 }
 
 static void _color_pixel(Pixel &pixel, double smooth_iteration) {
