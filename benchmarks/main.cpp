@@ -15,7 +15,7 @@ double standard_deviation(const std::vector<uint64_t>& durations);
 
 int main() {
     std::cout << std::fixed << std::setprecision(0);
-    initialize_workers();
+    initialize_workers(false);
     Dimensions cases[5];
 
     // Baseline

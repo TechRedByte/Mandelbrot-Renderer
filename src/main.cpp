@@ -28,7 +28,7 @@ int main() {
         return 0;
     }
 
-    initialize_workers();
+    initialize_workers(true);
 
     assign_task(dimensions);
 

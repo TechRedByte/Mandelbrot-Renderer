@@ -47,9 +47,14 @@ static void _calculator_worker();
 static double _calculate_iterations(double real, double imaginary);
 static void _color_pixel(Pixel &pixel, double smooth_iteration);
 
-void initialize_workers() {
-    worker_thread = std::thread(_worker);
-    for (int i = 0; i < WORKER_THREADS; i++) {
+void initialize_workers(bool asynchronous) {
+    unsigned int thread_count = std::thread::hardware_concurrency();
+
+    if (asynchronous) {
+        worker_thread = std::thread(_worker);
+    }
+
+    for (int i = 0; i < thread_count; i++) {
         calculator_threads.emplace_back(_calculator_worker);
     }
 }
