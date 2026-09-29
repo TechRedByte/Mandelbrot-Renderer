@@ -92,35 +92,12 @@ static void _worker() {
             task_available = false;
         }
 
-        Dimensions low_res_task = task;
-        low_res_task.width = (task.width + LOW_RESOLUTION_SCALE - 1) / LOW_RESOLUTION_SCALE;
-        low_res_task.height = (task.height + LOW_RESOLUTION_SCALE - 1) / LOW_RESOLUTION_SCALE;
-        low_res_task.scale = task.scale * LOW_RESOLUTION_SCALE;
-
-        std::vector<Pixel> result_buffer = calculate_fractal(low_res_task);
-
-        pixels.clear();
-        pixels.resize(task.width * task.height);
-        for (int y = 0; y < task.height; y++) {
-            for (int x = 0; x < task.width; x++) {
-                pixels[y * task.width + x] = result_buffer[(y / LOW_RESOLUTION_SCALE) * low_res_task.width + (x / LOW_RESOLUTION_SCALE)];
-            }
-        }
+        std::vector<Pixel> result_buffer = calculate_fractal(task);
         {
             std::lock_guard<std::mutex> lock(result_mutex);
             result.dimensions = task;
-            result.pixels = std::move(pixels);
+            result.pixels = std::move(result_buffer);
             result_available = true;
-        }
-
-        if (!task_available) {
-            result_buffer = calculate_fractal(task);
-            {
-                std::lock_guard<std::mutex> lock(result_mutex);
-                result.dimensions = task;
-                result.pixels = std::move(result_buffer);
-                result_available = true;
-            }
         }
     }
 }
