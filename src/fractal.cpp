@@ -92,12 +92,35 @@ static void _worker() {
             task_available = false;
         }
 
-        std::vector<Pixel> result_buffer = calculate_fractal(task);
+        Dimensions low_res_task = task;
+        low_res_task.width = (task.width + LOW_RESOLUTION_SCALE - 1) / LOW_RESOLUTION_SCALE;
+        low_res_task.height = (task.height + LOW_RESOLUTION_SCALE - 1) / LOW_RESOLUTION_SCALE;
+        low_res_task.scale = task.scale * LOW_RESOLUTION_SCALE;
+
+        std::vector<Pixel> result_buffer = calculate_fractal(low_res_task);
+
+        pixels.clear();
+        pixels.resize(task.width * task.height);
+        for (int y = 0; y < task.height; y++) {
+            for (int x = 0; x < task.width; x++) {
+                pixels[y * task.width + x] = result_buffer[(y / LOW_RESOLUTION_SCALE) * low_res_task.width + (x / LOW_RESOLUTION_SCALE)];
+            }
+        }
         {
             std::lock_guard<std::mutex> lock(result_mutex);
             result.dimensions = task;
-            result.pixels = std::move(result_buffer);
+            result.pixels = std::move(pixels);
             result_available = true;
+        }
+
+        if (!task_available) {
+            result_buffer = calculate_fractal(task);
+            {
+                std::lock_guard<std::mutex> lock(result_mutex);
+                result.dimensions = task;
+                result.pixels = std::move(result_buffer);
+                result_available = true;
+            }
         }
     }
 }
@@ -115,10 +138,10 @@ std::vector<Pixel> calculate_fractal(Dimensions task) {
 
             worker_task.start_x = task.width * region_x / regions_per_side;
             worker_task.end_x = task.width * (region_x + 1) / regions_per_side;
-    
+
             worker_task.start_y = task.height * region_y / regions_per_side;
             worker_task.end_y = task.height * (region_y + 1) / regions_per_side;
-    
+
             task_queue.push(worker_task);
         }
     }

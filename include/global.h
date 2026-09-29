@@ -33,3 +33,4 @@ struct Result {
 constexpr unsigned int MAX_ITERATIONS = 256;
 constexpr unsigned int NUM_REGIONS = 361; // Must be a whole square number
 constexpr double PALETTE_DENSITY = 255;
+constexpr unsigned int LOW_RESOLUTION_SCALE = 4;

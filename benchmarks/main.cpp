@@ -70,7 +70,7 @@ int main() {
     std::vector<double> standard_deviation_nums;
     for (unsigned int i = 0; i < std::size(cases); i++) {
         std::vector<uint64_t> durations;
-        for (unsigned int b = 0; b < 100; b++) {
+        for (unsigned int b = 0; b < 10; b++) {
             auto start = std::chrono::steady_clock::now();
             calculate_fractal(cases[i]);
             auto end = std::chrono::steady_clock::now();
