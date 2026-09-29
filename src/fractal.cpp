@@ -199,7 +199,7 @@ static double _calculate_iterations(double real, double imaginary) {
         return MAX_ITERATIONS;
     }
 
-    return iteration + 1 - std::log((std::log(magnitude_squared) / 4) / std::log(2.0)) / std::log(2.0);
+    return iteration + 1 - std::log(std::log(magnitude_squared) / 2.0) / std::log(2.0);
 }
 
 static void _color_pixel(Pixel &pixel, double smooth_iteration) {
