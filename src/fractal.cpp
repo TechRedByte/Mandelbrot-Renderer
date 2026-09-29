@@ -1,7 +1,6 @@
 #include <condition_variable>
 #include <algorithm>
 #include <optional>
-#include <complex>
 #include <vector>
 #include <thread>
 #include <mutex>
@@ -178,14 +177,21 @@ static void _calculate_region(RegionTask task) {
 }
 
 static double _calculate_iterations(double real, double imaginary) {
-    std::complex<double> c(real, imaginary);
-    std::complex<double> z(0.0, 0.0);
-
+    double x = 0.0;
+    double y = 0.0;
+    double magnitude_squared;
     unsigned int iteration;
-    for (iteration = 0; iteration < MAX_ITERATIONS; iteration++) {
-        z = z * z + c;
 
-        if (std::norm(z) > 128.0) {
+    for (iteration = 0; iteration < MAX_ITERATIONS; iteration++) {
+        double x_new = x * x - y * y + real;
+        double y_new = 2.0 * x * y + imaginary;
+
+        x = x_new;
+        y = y_new;
+
+        magnitude_squared = x * x + y * y;
+
+        if (magnitude_squared > 128.0) {
             break;
         }
     }
@@ -193,7 +199,7 @@ static double _calculate_iterations(double real, double imaginary) {
         return MAX_ITERATIONS;
     }
 
-    return iteration + 1 - std::log((std::log(std::abs(z)) / 2) / std::log(2)) / std::log(2);
+    return iteration + 1 - std::log((std::log(magnitude_squared) / 4) / std::log(2.0)) / std::log(2.0);
 }
 
 static void _color_pixel(Pixel &pixel, double smooth_iteration) {
