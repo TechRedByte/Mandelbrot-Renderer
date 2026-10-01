@@ -6,6 +6,7 @@
 #include <thread>
 
 #include "fractal.h"
+#include "logger.h"
 #include "global.h"
 
 static SDL_Window *window = nullptr;

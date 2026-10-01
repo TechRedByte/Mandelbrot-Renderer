@@ -3,6 +3,8 @@
 #include <cstdint>
 #include <vector>
 
+#include "logger.h"
+
 struct Pixel {
     uint8_t r;
     uint8_t g;
@@ -30,6 +32,7 @@ struct Result {
     std::vector<Pixel> pixels;
 };
 
+constexpr LogLevel LOG_LEVEL = Debug;
 constexpr unsigned int MAX_ITERATIONS = 256;
 constexpr unsigned int NUM_REGIONS = 361; // Must be a whole square number
 constexpr double PALETTE_DENSITY = 255;

@@ -13,6 +13,7 @@ add_executable(mandelbrot
     src/main.cpp
     src/fractal.cpp
     src/palette.cpp
+    src/logger.cpp
 )
 
 target_include_directories(mandelbrot PRIVATE
