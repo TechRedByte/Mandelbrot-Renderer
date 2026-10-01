@@ -1,13 +1,17 @@
 #include <cstdarg>
 #include <chrono>
 #include <cstdio>
+#include <mutex>
 
 #include "global.h"
 #include "logger.h"
 
+static std::mutex mutex;
 static const auto start_time = std::chrono::steady_clock::now();
 
 void log_debug_impl(const char* format, ...) {
+    std::lock_guard<std::mutex> lock(mutex);
+
     const long long elapsed =
     std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::steady_clock::now() - start_time
@@ -24,6 +28,8 @@ void log_debug_impl(const char* format, ...) {
 }
 
 void log_info_impl(const char* format, ...) {
+    std::lock_guard<std::mutex> lock(mutex);
+
     const long long elapsed =
     std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::steady_clock::now() - start_time
@@ -40,6 +46,8 @@ void log_info_impl(const char* format, ...) {
 }
 
 void log_warning_impl(const char* format, ...) {
+    std::lock_guard<std::mutex> lock(mutex);
+
     const long long elapsed =
     std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::steady_clock::now() - start_time
@@ -56,6 +64,8 @@ void log_warning_impl(const char* format, ...) {
 }
 
 void log_error_impl(const char* format, ...) {
+    std::lock_guard<std::mutex> lock(mutex);
+    
     const long long elapsed =
     std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::steady_clock::now() - start_time

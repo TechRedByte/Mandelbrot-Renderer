@@ -10,6 +10,7 @@ add_executable(benchmark
     main.cpp
     ../src/fractal.cpp
     ../src/palette.cpp
+    ../src/logger.cpp
 )
 
 target_include_directories(benchmark PRIVATE
