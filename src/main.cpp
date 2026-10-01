@@ -1,6 +1,5 @@
 #include <SDL3/SDL.h>
 #include <optional>
-#include <iostream>
 #include <cstdint>
 #include <vector>
 #include <thread>
@@ -25,11 +24,13 @@ static void update_renderer();
 
 int main() {
     if (!init_sdl(dimensions.width, dimensions.height)) {
-        std::cout << "Failed to initialize SDL.";
+        log_error("Failed to initialize SDL: %c", SDL_GetError());
         return 0;
     }
+    log_info("SDL initialized.");
 
     initialize_workers(true);
+    log_info("Workers initialized.");
 
     assign_task(dimensions);
 
@@ -114,6 +115,7 @@ int main() {
         SDL_Delay(16);
     }
 
+    log_info("Quitting...");
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();

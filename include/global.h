@@ -32,7 +32,6 @@ struct Result {
     std::vector<Pixel> pixels;
 };
 
-constexpr LogLevel LOG_LEVEL = Debug;
 constexpr unsigned int MAX_ITERATIONS = 256;
 constexpr unsigned int NUM_REGIONS = 361; // Must be a whole square number
 constexpr double PALETTE_DENSITY = 255;
