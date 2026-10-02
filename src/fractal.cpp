@@ -206,7 +206,13 @@ static double _calculate_iterations(double real, double imaginary) {
         return MAX_ITERATIONS;
     }
 
-    return iteration + 1 - std::log(std::log(magnitude_squared) / 2.0) / std::numbers::ln2;
+    double smooth_iteration = iteration + 1 - std::log(std::log(magnitude_squared) / 2.0) / std::numbers::ln2;
+
+    if (smooth_iteration < 0.0) { // Check for negative values, which occour far out of the set
+        smooth_iteration = 0.0;
+    }
+
+    return smooth_iteration;
 }
 
 static void _color_pixel(Pixel &pixel, double smooth_iteration) {
