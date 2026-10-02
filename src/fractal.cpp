@@ -208,7 +208,8 @@ static double _calculate_iterations(double real, double imaginary) {
 
     double smooth_iteration = iteration + 1 - std::log(std::log(magnitude_squared) / 2.0) / std::numbers::ln2;
 
-    if (smooth_iteration < 0.0) { // Check for negative values, which occour far out of the set
+    // Clamp to non-negative values, which occour far out of the set
+    if (smooth_iteration < 0.0) {
         smooth_iteration = 0.0;
     }
 
