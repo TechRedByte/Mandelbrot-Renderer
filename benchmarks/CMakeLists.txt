@@ -16,3 +16,9 @@ add_executable(benchmark
 target_include_directories(benchmark PRIVATE
     ../include
 )
+
+target_compile_options(benchmark PRIVATE
+    -Wall
+    -Wextra
+    -Wformat=2
+)

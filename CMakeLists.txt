@@ -24,3 +24,9 @@ target_include_directories(mandelbrot PRIVATE
 target_link_libraries(mandelbrot PRIVATE
     ${SDL3_LIBRARIES}
 )
+
+target_compile_options(mandelbrot PRIVATE
+    -Wall
+    -Wextra
+    -Wformat=2
+)

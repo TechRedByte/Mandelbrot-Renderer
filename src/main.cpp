@@ -92,6 +92,7 @@ int main() {
                     dimensions.center_x += (event.wheel.mouse_x - dimensions.width / 2) * dimensions.scale * (1.0 - zoom_factor);
                     dimensions.center_y += (event.wheel.mouse_y - dimensions.height / 2) * dimensions.scale * (1.0 - zoom_factor);
                     dimensions.scale *= zoom_factor;
+
                 } else if (event.wheel.y < 0) { // Zooming out
                     float zoom_factor = 1.25;
 
@@ -106,6 +107,7 @@ int main() {
 
         if (auto result = return_result()) {
             if (result->dimensions == dimensions) {
+                log_debug("Rendered image at: x: %.15e, y: %.15e, scale: %.15e", dimensions.center_x, dimensions.center_y, dimensions.scale);
                 pixels = result->pixels;
                 update_texture();
             }

@@ -46,6 +46,7 @@ static void _calculate_region(RegionTask task);
 static void _calculator_worker();
 static double _calculate_iterations(double real, double imaginary);
 static void _color_pixel(Pixel &pixel, double smooth_iteration);
+static bool _check_cardioid_and_period_2(double real, double imaginary);
 
 void initialize_workers(bool asynchronous) {
     unsigned int thread_count = std::thread::hardware_concurrency();
@@ -54,7 +55,7 @@ void initialize_workers(bool asynchronous) {
         worker_thread = std::thread(_worker);
     }
 
-    for (int i = 0; i < thread_count; i++) {
+    for (unsigned int i = 0; i < thread_count; i++) {
         calculator_threads.emplace_back(_calculator_worker);
     }
 }
@@ -109,8 +110,8 @@ std::vector<Pixel> calculate_fractal(Dimensions task) {
 
     tasks_remaining = NUM_REGIONS;
     worker_task.dimensions = task;
-    for (int region_y = 0; region_y < regions_per_side; region_y++) {
-        for (int region_x = 0; region_x < regions_per_side; region_x++) {
+    for (unsigned int region_y = 0; region_y < regions_per_side; region_y++) {
+        for (unsigned int region_x = 0; region_x < regions_per_side; region_x++) {
             std::lock_guard<std::mutex> lock(task_queue_mutex);
 
             worker_task.start_x = task.width * region_x / regions_per_side;
@@ -161,18 +162,23 @@ static void _calculator_worker() {
 static void _calculate_region(RegionTask task) {
     std::vector<double> imaginaries(task.end_y - task.start_y);
     std::vector<double> reals(task.end_x - task.start_x);
-    for (int y = task.start_y; y < task.end_y; y++) {
+
+    for (unsigned int y = task.start_y; y < task.end_y; y++) {
         imaginaries[y - task.start_y] = task.dimensions.center_y + (y - task.dimensions.height / 2.0) * task.dimensions.scale;
     }
-    for (int x = task.start_x; x < task.end_x; x++) {
+    for (unsigned int x = task.start_x; x < task.end_x; x++) {
         reals[x - task.start_x] = task.dimensions.center_x + (x - task.dimensions.width / 2.0) * task.dimensions.scale;
     }
-    for (int y = 0; y < imaginaries.size(); y++) {
-        for (int x = 0; x < reals.size(); x++) {
-            _color_pixel(
-                pixels[(y + task.start_y) * task.dimensions.width + (x + task.start_x)],
-                _calculate_iterations(reals[x], imaginaries[y])
-            );
+
+    for (unsigned int y = 0; y < imaginaries.size(); y++) {
+        for (unsigned int x = 0; x < reals.size(); x++) {
+            Pixel &pixel = pixels[(y + task.start_y) * task.dimensions.width + (x + task.start_x)];
+
+            if (_check_cardioid_and_period_2(reals[x], imaginaries[y])) {
+                _color_pixel(pixel, MAX_ITERATIONS);
+            } else {
+                _color_pixel(pixel, _calculate_iterations(reals[x], imaginaries[y]));
+            }
         }
     }
 }
@@ -211,4 +217,20 @@ static void _color_pixel(Pixel &pixel, double smooth_iteration) {
     } else {
         pixel = get_color(smooth_iteration);
     }
+}
+
+static bool _check_cardioid_and_period_2(double real, double imaginary) {
+    // Period-2 bulb check
+    if ((real + 1.0) * (real + 1.0) + imaginary * imaginary <= 0.0625) {
+        return true;
+    }
+    
+    // Cardioid check
+    double q = (real - 0.25) * (real - 0.25) + imaginary * imaginary;
+
+    if (q * (q + (real - 0.25)) <= 0.25 * imaginary * imaginary) {
+        return true;
+    }
+
+    return false;
 }
