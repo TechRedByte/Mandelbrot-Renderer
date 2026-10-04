@@ -25,7 +25,7 @@
 
 ### What I did
 
-- Created benchamrk program to measure mean time
+- Created benchmark program to measure mean time
 - Made fractal calculation multithreaded
 - Removed task cancellation because it complicated things too much and was also bad for performance
 - Made zooming centered on mouse
@@ -45,3 +45,25 @@ These changes made the renderer 16× faster in my benchmark.
 - Dynamic max iterations, so it would compute more as needed when zooming in
 - Automatic worker threads number based on the cpu threads
 - Further optimizations
+
+## 04.10.2026
+
+### What I did
+
+- Added the foundation of a color palette system that can be expanded later
+- Fine-tuned smooth iteration coloring until the visible iteration bands disappeared completely
+- Made the number of worker threads automatically depend on the available CPU threads
+- Added a basic logging system
+- Added cardioid and period-2 bulb checks before performing the iteration calculation, which can make rendering up to 2× faster in some cases
+
+### Chalenges
+
+- Fixed a bug that caused a circular region to appear around the fractal due to negative smooth iteration values, now it's clamped to non negative values
+
+### Next up
+
+A new chapter in the life of the renderer
+
+- Add arbitrary-precision arithmetic to enable extremely deep zooming
+- Implement perturbation theory and optimize it with SIMD for further performance
+- Add headless image and possibly video rendering
