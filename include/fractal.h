@@ -1,13 +1,14 @@
 #pragma once
 
-#include <condition_variable>
-#include <optional>
 #include <vector>
-#include <mutex>
 
 #include "global.h"
 
-void initialize_workers(bool asynchronous);
-void assign_task(Dimensions dimensions);
-std::optional<Result> return_result();
-std::vector<Pixel> calculate_fractal(Dimensions task);
+struct Region {
+    unsigned int start_x;
+    unsigned int end_x;
+    unsigned int start_y;
+    unsigned int end_y;
+};
+
+void calculate_region(const Dimensions &dimensions, const Region &region, std::vector<Pixel> &pixels);

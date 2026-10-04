@@ -6,7 +6,7 @@
 #include <chrono>
 #include <cmath>
 
-#include "fractal.h"
+#include "renderer.h"
 #include "global.h"
 
 double mean(const std::vector<uint64_t>& durations);

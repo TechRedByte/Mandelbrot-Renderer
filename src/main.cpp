@@ -1,10 +1,8 @@
 #include <SDL3/SDL.h>
 #include <optional>
-#include <cstdint>
 #include <vector>
-#include <thread>
 
-#include "fractal.h"
+#include "renderer.h"
 #include "logger.h"
 #include "global.h"
 

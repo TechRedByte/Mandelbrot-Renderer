@@ -11,9 +11,10 @@ pkg_check_modules(SDL3 REQUIRED sdl3)
 
 add_executable(mandelbrot
     src/main.cpp
+    src/logger.cpp
     src/fractal.cpp
     src/palette.cpp
-    src/logger.cpp
+    src/renderer.cpp
 )
 
 target_include_directories(mandelbrot PRIVATE

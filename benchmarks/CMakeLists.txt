@@ -8,9 +8,10 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_executable(benchmark
     main.cpp
+    ../src/logger.cpp
     ../src/fractal.cpp
     ../src/palette.cpp
-    ../src/logger.cpp
+    ../src/renderer.cpp
 )
 
 target_include_directories(benchmark PRIVATE
