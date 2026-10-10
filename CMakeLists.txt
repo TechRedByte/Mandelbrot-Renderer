@@ -8,6 +8,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(SDL3 REQUIRED sdl3)
+pkg_check_modules(MPFR REQUIRED mpfr)
 
 add_executable(mandelbrot
     src/main.cpp
@@ -15,15 +16,18 @@ add_executable(mandelbrot
     src/fractal.cpp
     src/palette.cpp
     src/renderer.cpp
+    src/arbitrary.cpp
 )
 
 target_include_directories(mandelbrot PRIVATE
     include
     ${SDL3_INCLUDE_DIRS}
+    ${MPFR_INCLUDE_DIRS}
 )
 
 target_link_libraries(mandelbrot PRIVATE
     ${SDL3_LIBRARIES}
+    ${MPFR_LIBRARIES}
 )
 
 target_compile_options(mandelbrot PRIVATE
