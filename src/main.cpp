@@ -89,7 +89,7 @@ int main() {
                 if (event.wheel.y > 0) { // Zooming in
                     float zoom_factor = 0.8;
 
-                    DynPrec new_scale = dimensions.scale *= zoom_factor;
+                    DynPrec new_scale = dimensions.scale * zoom_factor;
 
                     dimensions.update_precision(new_scale);
 
@@ -100,7 +100,7 @@ int main() {
                 } else if (event.wheel.y < 0) { // Zooming out
                     float zoom_factor = 1.25;
 
-                    DynPrec new_scale = dimensions.scale *= zoom_factor;
+                    DynPrec new_scale = dimensions.scale * zoom_factor;
 
                     dimensions.update_precision(new_scale);
 

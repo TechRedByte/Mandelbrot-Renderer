@@ -61,12 +61,10 @@ static double _calculate_iterations(DynPrec real, DynPrec imaginary, mpfr_prec_t
         return MAX_ITERATIONS;
     }
 
-    double smooth_iteration = (iteration + 1.0 - arbitrary::log2(arbitrary::log2(magnitude_squared) / 2.0) / std::numbers::ln2).get_double();
-
-    // Clamp to non-negative values, which occour far out of the set
-    if (smooth_iteration < 0.0) {
-        smooth_iteration = 0.0;
-    }
+    double smooth_iteration = std::max(
+        0.0,
+        (iteration + 1.0 - arbitrary::log2(arbitrary::log2(magnitude_squared) / 2.0) / std::numbers::ln2).get_double()
+    );
 
     return smooth_iteration;
 }
