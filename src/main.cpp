@@ -2,6 +2,7 @@
 #include <optional>
 #include <vector>
 
+#include "arbitrary.h"
 #include "renderer.h"
 #include "logger.h"
 #include "global.h"
@@ -19,6 +20,7 @@ static std::vector<Pixel> pixels(dimensions.width * dimensions.height);
 static bool init_sdl(unsigned int width, unsigned int height);
 static void update_texture();
 static void update_renderer();
+void update_precision(Dimensions& dimensions, DynPrec& scale);
 
 int main() {
     if (!init_sdl(dimensions.width, dimensions.height)) {
@@ -64,8 +66,8 @@ int main() {
                     int mouse_x = event.motion.x;
                     int mouse_y = event.motion.y;
 
-                    int mouse_delta_x = mouse_x - last_mouse_x;
-                    int mouse_delta_y = mouse_y - last_mouse_y;
+                    DynPrec mouse_delta_x = mouse_x - last_mouse_x;
+                    DynPrec mouse_delta_y = mouse_y - last_mouse_y;
 
                     dimensions.center_x -= mouse_delta_x * dimensions.scale;
                     dimensions.center_y -= mouse_delta_y * dimensions.scale;
@@ -87,15 +89,19 @@ int main() {
                 if (event.wheel.y > 0) { // Zooming in
                     float zoom_factor = 0.8;
 
-                    dimensions.center_x += (event.wheel.mouse_x - dimensions.width / 2) * dimensions.scale * (1.0 - zoom_factor);
-                    dimensions.center_y += (event.wheel.mouse_y - dimensions.height / 2) * dimensions.scale * (1.0 - zoom_factor);
-                    dimensions.scale *= zoom_factor;
+                    DynPrec new_scale = dimensions.scale *= zoom_factor;
+
+                    update_precision(dimensions, new_scale);
+
+                    dimensions.center_x += (event.wheel.mouse_x - dimensions.width / 2.0) * dimensions.scale * (1.0 - zoom_factor);
+                    dimensions.center_y += (event.wheel.mouse_y - dimensions.height / 2.0) * dimensions.scale * (1.0 - zoom_factor);
+                    dimensions.scale = new_scale;
 
                 } else if (event.wheel.y < 0) { // Zooming out
                     float zoom_factor = 1.25;
 
-                    dimensions.center_x += (event.wheel.mouse_x - dimensions.width / 2) * dimensions.scale * (1.0 - zoom_factor);
-                    dimensions.center_y += (event.wheel.mouse_y - dimensions.height / 2) * dimensions.scale * (1.0 - zoom_factor);
+                    dimensions.center_x += (event.wheel.mouse_x - dimensions.width / 2.0) * dimensions.scale * (1.0 - zoom_factor);
+                    dimensions.center_y += (event.wheel.mouse_y - dimensions.height / 2.0) * dimensions.scale * (1.0 - zoom_factor);
                     dimensions.scale *= zoom_factor;
                 }
 
@@ -105,7 +111,13 @@ int main() {
 
         if (auto result = return_result()) {
             if (result->dimensions == dimensions) {
-                log_debug("Rendered image at: x: %.15e, y: %.15e, scale: %.15e", dimensions.center_x, dimensions.center_y, dimensions.scale);
+                log_debug(
+                    "Rendered image at: x: %.15e, y: %.15e, scale: %.15e",
+                    dimensions.center_x.get_double(),
+                    dimensions.center_y.get_double(),
+                    dimensions.scale.get_double()
+                );
+
                 pixels = result->pixels;
                 update_texture();
             }
@@ -173,4 +185,23 @@ static bool init_sdl(unsigned int width, unsigned int height) {
     }
 
     return true;
+}
+
+void update_precision(Dimensions& dimension, DynPrec& scale) {
+    DynPrec magnitude = arbitrary::max(
+        arbitrary::max(arbitrary::abs(dimension.center_x), arbitrary::abs(dimension.center_y)),
+        scale
+    );
+
+    mpfr_prec_t precision = arbitrary::ceil(
+        arbitrary::log2(magnitude / scale)
+    ).get_long() + GUARD_BITS;
+
+    precision = std::max(precision, static_cast<mpfr_prec_t>(MPFR_PREC_MIN));
+
+    if (precision <= MPFR_PREC_MAX) {
+        dimension.center_x.set_precision(precision);
+        dimension.center_y.set_precision(precision);
+        dimension.scale.set_precision(precision);
+    }
 }

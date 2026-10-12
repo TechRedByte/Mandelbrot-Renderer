@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <vector>
 
+#include "arbitrary.h"
 #include "logger.h"
 
 struct Pixel {
@@ -14,9 +15,9 @@ struct Pixel {
 struct Dimensions {
     int width = 800;
     int height = 600;
-    double scale = 0.004;
-    double center_x = -0.75;
-    double center_y = 0.0;
+    DynPrec scale = 0.004;
+    DynPrec center_x = -0.75;
+    DynPrec center_y = 0.0;
 
     bool operator==(const Dimensions& other) const {
         return width == other.width &&
@@ -35,3 +36,4 @@ struct Result {
 constexpr unsigned int MAX_ITERATIONS = 256;
 constexpr unsigned int NUM_REGIONS = 361; // Must be a whole square number
 constexpr double PALETTE_DENSITY = 255;
+constexpr mpfr_prec_t GUARD_BITS = 32;
