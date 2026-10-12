@@ -15,7 +15,7 @@ add_executable(benchmark
     ../src/fractal.cpp
     ../src/palette.cpp
     ../src/renderer.cpp
-    ../ src/arbitrary.cpp
+    ../src/arbitrary.cpp
 )
 
 target_include_directories(benchmark PRIVATE
@@ -23,7 +23,7 @@ target_include_directories(benchmark PRIVATE
     ${MPFR_INCLUDE_DIRS}
 )
 
-target_link_libraries(mandelbrot PRIVATE
+target_link_libraries(benchmark PRIVATE
     ${MPFR_LIBRARIES}
 )
 

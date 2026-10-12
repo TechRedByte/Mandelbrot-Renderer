@@ -7,19 +7,22 @@
 #include "fractal.h"
 #include "global.h"
 
-static double _calculate_iterations(DynPrec real, DynPrec imaginary);
+static double _calculate_iterations(DynPrec real, DynPrec imaginary, mpfr_prec_t precision);
 static void _color_pixel(Pixel &pixel, double smooth_iteration);
 static bool _check_cardioid_and_period2(DynPrec real, DynPrec imaginary);
 
 void calculate_region(const Dimensions &dimensions, const Region &region, std::vector<Pixel> &pixels) {
-    std::vector<DynPrec> imaginaries(region.end_y - region.start_y);
-    std::vector<DynPrec> reals(region.end_x - region.start_x);
+    std::vector<DynPrec> imaginaries;
+    std::vector<DynPrec> reals;
 
     for (unsigned int y = region.start_y; y < region.end_y; y++) {
-        imaginaries[y - region.start_y] = dimensions.center_y + (y - dimensions.height / 2.0) * dimensions.scale;
+        imaginaries.emplace_back(dimensions.precision);
+        imaginaries.back() = dimensions.center_y + (y - dimensions.height / 2.0) * dimensions.scale;
     }
+
     for (unsigned int x = region.start_x; x < region.end_x; x++) {
-        reals[x - region.start_x] = dimensions.center_x + (x - dimensions.width / 2.0) * dimensions.scale;
+        reals.emplace_back(dimensions.precision);
+        reals.back() = dimensions.center_x + (x - dimensions.width / 2.0) * dimensions.scale;
     }
 
     for (unsigned int y = 0; y < imaginaries.size(); y++) {
@@ -29,16 +32,16 @@ void calculate_region(const Dimensions &dimensions, const Region &region, std::v
             if (_check_cardioid_and_period2(reals[x], imaginaries[y])) {
                 _color_pixel(pixel, MAX_ITERATIONS);
             } else {
-                _color_pixel(pixel, _calculate_iterations(reals[x], imaginaries[y]));
+                _color_pixel(pixel, _calculate_iterations(reals[x], imaginaries[y], dimensions.precision));
             }
         }
     }
 }
 
-static double _calculate_iterations(DynPrec real, DynPrec imaginary) {
+static double _calculate_iterations(DynPrec real, DynPrec imaginary, mpfr_prec_t precision) {
     DynPrec x = 0.0;
     DynPrec y = 0.0;
-    DynPrec magnitude_squared;
+    DynPrec magnitude_squared(precision);
     unsigned int iteration;
 
     for (iteration = 0; iteration < MAX_ITERATIONS; iteration++) {

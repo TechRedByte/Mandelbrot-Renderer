@@ -17,7 +17,6 @@ class DynPrec {
 private:
     mpfr_t _variable;
 public:
-    DynPrec();
     DynPrec(const char* value);
     DynPrec(const double value);
     DynPrec(const long double value);
@@ -26,7 +25,7 @@ public:
     DynPrec(mpfr_prec_t precision);
     DynPrec(const DynPrec& other);
     
-    void set_precision(unsigned int precision);
+    void set_precision(mpfr_prec_t precision);
     
     DynPrec& operator=(const DynPrec& other);
     

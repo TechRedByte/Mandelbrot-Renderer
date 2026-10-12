@@ -10,11 +10,6 @@
 #include "logger.h"
 #include "global.h"
 
-DynPrec::DynPrec() {
-    mpfr_init2(_variable, MPFR_PREC_MIN);
-    mpfr_set_zero(_variable, 0);
-}
-
 DynPrec::DynPrec(const char* value) {
     std::string str(value);
 
@@ -67,7 +62,7 @@ DynPrec::DynPrec(mpfr_prec_t precision) {
     if (precision >= MPFR_PREC_MIN && precision <= MPFR_PREC_MAX) {
         mpfr_init2(_variable, precision);
     } else {
-        log_error("Failed to construct DynPrec variable: %lo", precision);
+        log_error("Failed to construct DynPrec variable: %ld", static_cast<long>(precision));
         throw std::invalid_argument("Invalid precision for DynPrec");
     }
 }
@@ -77,11 +72,11 @@ DynPrec::DynPrec(const DynPrec& other) {
     mpfr_set(_variable, other._variable, MPFR_RNDN);
 }
 
-void DynPrec::set_precision(unsigned int precision) {
+void DynPrec::set_precision(mpfr_prec_t precision) {
     if (precision >= MPFR_PREC_MIN && precision <= MPFR_PREC_MAX) {
         mpfr_prec_round(_variable, precision, MPFR_RNDN);
     } else {
-        log_error("Failed to construct DynPrec variable: %i", precision);
+        log_error("Failed to construct DynPrec variable: %ld", static_cast<long>(precision));
         throw std::invalid_argument("Invalid precision for DynPrec");
     }
 }

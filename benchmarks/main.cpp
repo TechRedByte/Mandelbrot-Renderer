@@ -6,6 +6,7 @@
 #include <chrono>
 #include <cmath>
 
+#include "arbitrary.h"
 #include "renderer.h"
 #include "global.h"
 
@@ -26,6 +27,7 @@ int main() {
         .center_x = -0.75,
         .center_y = 0.0
     };
+    cases[0].update_precision(cases[0].scale);
 
     // High resolution
     cases[1] = {
@@ -35,6 +37,7 @@ int main() {
         .center_x = -0.75,
         .center_y = 0.0
     };
+    cases[1].update_precision(cases[1].scale);
 
     // Boundary-heavy
     cases[2] = {
@@ -44,6 +47,7 @@ int main() {
         .center_x = -0.743643887037151,
         .center_y = 0.131825904205330
     };
+    cases[2].update_precision(cases[2].scale);
 
     // Deep zoom
     cases[3] = {
@@ -53,6 +57,7 @@ int main() {
         .center_x = -0.743643887037151,
         .center_y = 0.131825904205330
     };
+    cases[3].update_precision(cases[3].scale);
 
     // Small image
     cases[4] = {
@@ -62,6 +67,7 @@ int main() {
         .center_x = -0.75,
         .center_y = 0.0
     };
+    cases[4].update_precision(cases[4].scale);
 
     std::vector<double> means;
     std::vector<double> medians;
@@ -70,7 +76,7 @@ int main() {
     std::vector<double> standard_deviation_nums;
     for (unsigned int i = 0; i < std::size(cases); i++) {
         std::vector<uint64_t> durations;
-        for (unsigned int b = 0; b < 100; b++) {
+        for (unsigned int b = 0; b < 10; b++) {
             auto start = std::chrono::steady_clock::now();
             calculate_fractal(cases[i]);
             auto end = std::chrono::steady_clock::now();
