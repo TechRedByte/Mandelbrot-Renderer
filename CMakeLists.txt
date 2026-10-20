@@ -10,13 +10,26 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(SDL3 REQUIRED sdl3)
 pkg_check_modules(MPFR REQUIRED mpfr)
 
-add_executable(mandelbrot
-    src/main.cpp
+# Shared source files
+set(COMMON_SOURCES
     src/logger.cpp
     src/fractal.cpp
     src/palette.cpp
     src/renderer.cpp
     src/arbitrary.cpp
+)
+
+# Compiler warnings
+set(COMMON_COMPILE_OPTIONS
+    -Wall
+    -Wextra
+    -Wformat=2
+)
+
+# Main renderer
+add_executable(mandelbrot
+    src/main.cpp
+    ${COMMON_SOURCES}
 )
 
 target_include_directories(mandelbrot PRIVATE
@@ -31,7 +44,43 @@ target_link_libraries(mandelbrot PRIVATE
 )
 
 target_compile_options(mandelbrot PRIVATE
-    -Wall
-    -Wextra
-    -Wformat=2
+    ${COMMON_COMPILE_OPTIONS}
+)
+
+# Benchmark executable
+add_executable(benchmark
+    benchmark/main.cpp
+    ${COMMON_SOURCES}
+)
+
+target_include_directories(benchmark PRIVATE
+    include
+    ${MPFR_INCLUDE_DIRS}
+)
+
+target_link_libraries(benchmark PRIVATE
+    ${MPFR_LIBRARIES}
+)
+
+target_compile_options(benchmark PRIVATE
+    ${COMMON_COMPILE_OPTIONS}
+)
+
+# DynPrec tests
+add_executable(test
+    tests/main.cpp
+    ${COMMON_SOURCES}
+)
+
+target_include_directories(test PRIVATE
+    include
+    ${MPFR_INCLUDE_DIRS}
+)
+
+target_link_libraries(test PRIVATE
+    ${MPFR_LIBRARIES}
+)
+
+target_compile_options(test PRIVATE
+    ${COMMON_COMPILE_OPTIONS}
 )
