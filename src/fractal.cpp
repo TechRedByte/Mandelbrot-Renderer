@@ -7,13 +7,13 @@
 #include "fractal.h"
 #include "global.h"
 
-static double _calculate_iterations(DynPrec real, DynPrec imaginary, mpfr_prec_t precision);
+static double _calculate_iterations(MPFR real, MPFR imaginary, mpfr_prec_t precision);
 static void _color_pixel(Pixel &pixel, double smooth_iteration);
-static bool _check_cardioid_and_period2(DynPrec real, DynPrec imaginary);
+static bool _check_cardioid_and_period2(MPFR real, MPFR imaginary);
 
 void calculate_region(const Dimensions &dimensions, const Region &region, std::vector<Pixel> &pixels) {
-    std::vector<DynPrec> imaginaries;
-    std::vector<DynPrec> reals;
+    std::vector<MPFR> imaginaries;
+    std::vector<MPFR> reals;
 
     for (unsigned int y = region.start_y; y < region.end_y; y++) {
         imaginaries.emplace_back(dimensions.precision);
@@ -38,15 +38,15 @@ void calculate_region(const Dimensions &dimensions, const Region &region, std::v
     }
 }
 
-static double _calculate_iterations(DynPrec real, DynPrec imaginary, mpfr_prec_t precision) {
-    DynPrec x = 0.0;
-    DynPrec y = 0.0;
-    DynPrec magnitude_squared(precision);
+static double _calculate_iterations(MPFR real, MPFR imaginary, mpfr_prec_t precision) {
+    MPFR x = 0.0;
+    MPFR y = 0.0;
+    MPFR magnitude_squared(precision);
     unsigned int iteration;
 
     for (iteration = 0; iteration < MAX_ITERATIONS; iteration++) {
-        DynPrec x_new = x * x - y * y + real;
-        DynPrec y_new = 2.0 * x * y + imaginary;
+        MPFR x_new = x * x - y * y + real;
+        MPFR y_new = 2.0 * x * y + imaginary;
 
         x = x_new;
         y = y_new;
@@ -79,14 +79,14 @@ static void _color_pixel(Pixel &pixel, double smooth_iteration) {
     }
 }
 
-static bool _check_cardioid_and_period2(DynPrec real, DynPrec imaginary) {
+static bool _check_cardioid_and_period2(MPFR real, MPFR imaginary) {
     // Period-2 bulb check
     if ((real + 1.0) * (real + 1.0) + imaginary * imaginary <= 0.0625) {
         return true;
     }
     
     // Cardioid check
-    DynPrec q = (real - 0.25) * (real - 0.25) + imaginary * imaginary;
+    MPFR q = (real - 0.25) * (real - 0.25) + imaginary * imaginary;
 
     if (q * (q + (real - 0.25)) <= 0.25 * imaginary * imaginary) {
         return true;

@@ -66,8 +66,8 @@ int main() {
                     int mouse_x = event.motion.x;
                     int mouse_y = event.motion.y;
 
-                    DynPrec mouse_delta_x = mouse_x - last_mouse_x;
-                    DynPrec mouse_delta_y = mouse_y - last_mouse_y;
+                    MPFR mouse_delta_x = mouse_x - last_mouse_x;
+                    MPFR mouse_delta_y = mouse_y - last_mouse_y;
 
                     dimensions.center_x -= mouse_delta_x * dimensions.scale;
                     dimensions.center_y -= mouse_delta_y * dimensions.scale;
@@ -89,7 +89,7 @@ int main() {
                 if (event.wheel.y > 0) { // Zooming in
                     float zoom_factor = 0.8;
 
-                    DynPrec new_scale = dimensions.scale * zoom_factor;
+                    MPFR new_scale = dimensions.scale * zoom_factor;
 
                     dimensions.update_precision(new_scale);
 
@@ -100,7 +100,7 @@ int main() {
                 } else if (event.wheel.y < 0) { // Zooming out
                     float zoom_factor = 1.25;
 
-                    DynPrec new_scale = dimensions.scale * zoom_factor;
+                    MPFR new_scale = dimensions.scale * zoom_factor;
 
                     dimensions.update_precision(new_scale);
 

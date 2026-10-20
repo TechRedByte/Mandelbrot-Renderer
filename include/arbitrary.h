@@ -4,72 +4,72 @@
 #include <string>
 
 struct Dimensions;
-class DynPrec;
+class MPFR;
 
 namespace arbitrary {
-    DynPrec log2(const DynPrec& value);
-    DynPrec abs(const DynPrec& value);
-    DynPrec ceil(const DynPrec& value);
-    DynPrec max(const DynPrec& a, const DynPrec& b);
+    MPFR log2(const MPFR& value);
+    MPFR abs(const MPFR& value);
+    MPFR ceil(const MPFR& value);
+    MPFR max(const MPFR& a, const MPFR& b);
 }
 
-class DynPrec {
+class MPFR {
 private:
     mpfr_t _variable;
 public:
-    DynPrec(const char* value);
-    DynPrec(const double value);
-    DynPrec(const long double value);
-    DynPrec(float value);
-    DynPrec(int value);
-    DynPrec(mpfr_prec_t precision);
-    DynPrec(const DynPrec& other);
+    MPFR(const char* value);
+    MPFR(const double value);
+    MPFR(const long double value);
+    MPFR(float value);
+    MPFR(int value);
+    MPFR(mpfr_prec_t precision);
+    MPFR(const MPFR& other);
 
     void set_precision(mpfr_prec_t precision);
 
     // ASSIGNMENT
-    DynPrec& operator=(const DynPrec& other);
+    MPFR& operator=(const MPFR& other);
 
     // ADDITION
-    DynPrec operator+(const DynPrec& other) const;
-    DynPrec& operator+=(const DynPrec& other);
+    MPFR operator+(const MPFR& other) const;
+    MPFR& operator+=(const MPFR& other);
 
     // SUBTRACTION
-    DynPrec operator-(const DynPrec& other) const;
-    friend DynPrec operator-(const double& lhs, const DynPrec& rhs);
-    DynPrec& operator-=(const DynPrec& other);
+    MPFR operator-(const MPFR& other) const;
+    friend MPFR operator-(const double& lhs, const MPFR& rhs);
+    MPFR& operator-=(const MPFR& other);
 
     // MULTIPLICATION
-    DynPrec operator*(const DynPrec& other) const;
-    DynPrec operator*(const double& other) const;
-    friend DynPrec operator*(const double& lhs, const DynPrec& rhs);
-    DynPrec& operator*=(const DynPrec& other);
+    MPFR operator*(const MPFR& other) const;
+    MPFR operator*(const double& other) const;
+    friend MPFR operator*(const double& lhs, const MPFR& rhs);
+    MPFR& operator*=(const MPFR& other);
 
     // DIVISION
-    DynPrec operator/(const DynPrec& other) const;
-    DynPrec& operator/=(const DynPrec& other);
+    MPFR operator/(const MPFR& other) const;
+    MPFR& operator/=(const MPFR& other);
 
     // OTHER
-    friend DynPrec arbitrary::log2(const DynPrec& value);
-    friend DynPrec arbitrary::abs(const DynPrec& value);
-    friend DynPrec arbitrary::ceil(const DynPrec& value);
-    friend DynPrec arbitrary::max(const DynPrec& a, const DynPrec& b);
+    friend MPFR arbitrary::log2(const MPFR& value);
+    friend MPFR arbitrary::abs(const MPFR& value);
+    friend MPFR arbitrary::ceil(const MPFR& value);
+    friend MPFR arbitrary::max(const MPFR& a, const MPFR& b);
 
     // LOGIC
-    bool operator==(const DynPrec& other) const;
-    bool operator!=(const DynPrec& other) const;
-    bool operator>(const DynPrec& other) const;
-    bool operator>=(const DynPrec& other) const;
-    bool operator<(const DynPrec& other) const;
-    bool operator<=(const DynPrec& other) const;
+    bool operator==(const MPFR& other) const;
+    bool operator!=(const MPFR& other) const;
+    bool operator>(const MPFR& other) const;
+    bool operator>=(const MPFR& other) const;
+    bool operator<(const MPFR& other) const;
+    bool operator<=(const MPFR& other) const;
 
     // NEGATION
-    DynPrec operator-() const;
+    MPFR operator-() const;
 
     double get_double() const;
     long double get_long_double() const;
     std::string get_string() const;
     long get_long() const;
 
-    ~DynPrec();
+    ~MPFR();
 };

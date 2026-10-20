@@ -21,13 +21,13 @@ struct Pixel {
 struct Dimensions {
     int width = 800;
     int height = 600;
-    DynPrec scale = 0.004;
-    DynPrec center_x = -0.75;
-    DynPrec center_y = 0.0;
+    MPFR scale = 0.004;
+    MPFR center_x = -0.75;
+    MPFR center_y = 0.0;
     mpfr_prec_t precision = MPFR_PREC_MIN;
 
-    void update_precision(DynPrec& new_scale) {
-        DynPrec magnitude = arbitrary::max(
+    void update_precision(MPFR& new_scale) {
+        MPFR magnitude = arbitrary::max(
             arbitrary::max(arbitrary::abs(center_x), arbitrary::abs(center_y)),
             new_scale
         );

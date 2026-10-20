@@ -10,7 +10,7 @@
 #include "logger.h"
 #include "global.h"
 
-DynPrec::DynPrec(const char* value) {
+MPFR::MPFR(const char* value) {
     std::string str(value);
 
     size_t digits = 0;
@@ -38,27 +38,27 @@ DynPrec::DynPrec(const char* value) {
     }
 }
 
-DynPrec::DynPrec(double value) {
+MPFR::MPFR(double value) {
     mpfr_init2(_variable, std::numeric_limits<double>::digits);
     mpfr_set_d(_variable, value, MPFR_RNDN);
 }
 
-DynPrec::DynPrec(long double value) {
+MPFR::MPFR(long double value) {
     mpfr_init2(_variable, std::numeric_limits<long double>::digits);
     mpfr_set_ld(_variable, value, MPFR_RNDN);
 }
 
-DynPrec::DynPrec(float value) {
+MPFR::MPFR(float value) {
     mpfr_init2(_variable, std::numeric_limits<float>::digits);
     mpfr_set_flt(_variable, value, MPFR_RNDN);
 }
 
-DynPrec::DynPrec(int value) {
+MPFR::MPFR(int value) {
     mpfr_init2(_variable, std::numeric_limits<int>::digits);
     mpfr_set_si(_variable, value, MPFR_RNDN);
 }
 
-DynPrec::DynPrec(mpfr_prec_t precision) {
+MPFR::MPFR(mpfr_prec_t precision) {
     if (precision >= MPFR_PREC_MIN && precision <= MPFR_PREC_MAX) {
         mpfr_init2(_variable, precision);
     } else {
@@ -67,12 +67,12 @@ DynPrec::DynPrec(mpfr_prec_t precision) {
     }
 }
 
-DynPrec::DynPrec(const DynPrec& other) {
+MPFR::MPFR(const MPFR& other) {
     mpfr_init2(_variable, mpfr_get_prec(other._variable));
     mpfr_set(_variable, other._variable, MPFR_RNDN);
 }
 
-void DynPrec::set_precision(mpfr_prec_t precision) {
+void MPFR::set_precision(mpfr_prec_t precision) {
     if (precision >= MPFR_PREC_MIN && precision <= MPFR_PREC_MAX) {
         mpfr_prec_round(_variable, precision, MPFR_RNDN);
     } else {
@@ -83,21 +83,21 @@ void DynPrec::set_precision(mpfr_prec_t precision) {
 
 
 // ASSIGNMENT
-DynPrec& DynPrec::operator=(const DynPrec& other) {
+MPFR& MPFR::operator=(const MPFR& other) {
     mpfr_set(_variable, other._variable, MPFR_RNDN);
     return *this;
 }
 
 
 // ADDITION
-DynPrec DynPrec::operator+(const DynPrec& other) const {
+MPFR MPFR::operator+(const MPFR& other) const {
     mpfr_prec_t precision = std::max(mpfr_get_prec(_variable), mpfr_get_prec(other._variable));
-    DynPrec result(precision);
+    MPFR result(precision);
     mpfr_add(result._variable, _variable, other._variable, MPFR_RNDN);
     return result;
 }
 
-DynPrec& DynPrec::operator+=(const DynPrec& other) {
+MPFR& MPFR::operator+=(const MPFR& other) {
     mpfr_prec_t precision = std::max(mpfr_get_prec(_variable), mpfr_get_prec(other._variable));
     set_precision(precision);
     mpfr_add(_variable, _variable, other._variable, MPFR_RNDN);
@@ -106,21 +106,21 @@ DynPrec& DynPrec::operator+=(const DynPrec& other) {
 
 
 // SUBTRACTION
-DynPrec DynPrec::operator-(const DynPrec& other) const {
+MPFR MPFR::operator-(const MPFR& other) const {
     mpfr_prec_t precision = std::max(mpfr_get_prec(_variable), mpfr_get_prec(other._variable));
-    DynPrec result(precision);
+    MPFR result(precision);
     mpfr_sub(result._variable, _variable, other._variable, MPFR_RNDN);
     return result;
 }
 
-DynPrec operator-(const double& lhs, const DynPrec& rhs) {
+MPFR operator-(const double& lhs, const MPFR& rhs) {
     mpfr_prec_t precision = std::max(static_cast<mpfr_prec_t>(std::numeric_limits<double>::digits), mpfr_get_prec(rhs._variable));
-    DynPrec result(precision);
+    MPFR result(precision);
     mpfr_d_sub(result._variable, lhs, rhs._variable, MPFR_RNDN);
     return result;
 }
 
-DynPrec& DynPrec::operator-=(const DynPrec& other) {
+MPFR& MPFR::operator-=(const MPFR& other) {
     mpfr_prec_t precision = std::max(mpfr_get_prec(_variable), mpfr_get_prec(other._variable));
     set_precision(precision);
     mpfr_sub(_variable, _variable, other._variable, MPFR_RNDN);
@@ -129,25 +129,25 @@ DynPrec& DynPrec::operator-=(const DynPrec& other) {
 
 
 // MULTIPLICATION
-DynPrec DynPrec::operator*(const DynPrec& other) const {
+MPFR MPFR::operator*(const MPFR& other) const {
     mpfr_prec_t precision = std::max(mpfr_get_prec(_variable), mpfr_get_prec(other._variable));
-    DynPrec result(precision);
+    MPFR result(precision);
     mpfr_mul(result._variable, _variable, other._variable, MPFR_RNDN);
     return result;
 }
 
-DynPrec DynPrec::operator*(const double& other) const {
+MPFR MPFR::operator*(const double& other) const {
     mpfr_prec_t precision = std::max(mpfr_get_prec(_variable), static_cast<mpfr_prec_t>(std::numeric_limits<double>::digits));
-    DynPrec result(precision);
+    MPFR result(precision);
     mpfr_mul_d(result._variable, _variable, other, MPFR_RNDN);
     return result;
 }
 
-DynPrec operator*(const double& lhs, const DynPrec& rhs) {
+MPFR operator*(const double& lhs, const MPFR& rhs) {
     return rhs * lhs;
 }
 
-DynPrec& DynPrec::operator*=(const DynPrec& other) {
+MPFR& MPFR::operator*=(const MPFR& other) {
     mpfr_prec_t precision = std::max(mpfr_get_prec(_variable), mpfr_get_prec(other._variable));
     set_precision(precision);
     mpfr_mul(_variable, _variable, other._variable, MPFR_RNDN);
@@ -156,14 +156,14 @@ DynPrec& DynPrec::operator*=(const DynPrec& other) {
 
 
 // DIVISION
-DynPrec DynPrec::operator/(const DynPrec& other) const {
+MPFR MPFR::operator/(const MPFR& other) const {
     mpfr_prec_t precision = std::max(mpfr_get_prec(_variable), mpfr_get_prec(other._variable));
-    DynPrec result(precision);
+    MPFR result(precision);
     mpfr_div(result._variable, _variable, other._variable, MPFR_RNDN);
     return result;
 }
 
-DynPrec& DynPrec::operator/=(const DynPrec& other) {
+MPFR& MPFR::operator/=(const MPFR& other) {
     mpfr_prec_t precision = std::max(mpfr_get_prec(_variable), mpfr_get_prec(other._variable));
     set_precision(precision);
     mpfr_div(_variable, _variable, other._variable, MPFR_RNDN);
@@ -172,72 +172,72 @@ DynPrec& DynPrec::operator/=(const DynPrec& other) {
 
 
 // LOGIC
-bool DynPrec::operator==(const DynPrec& other) const {
+bool MPFR::operator==(const MPFR& other) const {
     return mpfr_equal_p(_variable, other._variable);
 }
 
-bool DynPrec::operator!=(const DynPrec& other) const {
+bool MPFR::operator!=(const MPFR& other) const {
     return !mpfr_equal_p(_variable, other._variable);
 }
 
-bool DynPrec::operator>(const DynPrec& other) const {
+bool MPFR::operator>(const MPFR& other) const {
     return mpfr_greater_p(_variable, other._variable);
 }
 
-bool DynPrec::operator>=(const DynPrec& other) const {
+bool MPFR::operator>=(const MPFR& other) const {
     return mpfr_greaterequal_p(_variable, other._variable);
 }
 
-bool DynPrec::operator<(const DynPrec& other) const {
+bool MPFR::operator<(const MPFR& other) const {
     return mpfr_less_p(_variable, other._variable);
 }
 
-bool DynPrec::operator<=(const DynPrec& other) const {
+bool MPFR::operator<=(const MPFR& other) const {
     return mpfr_lessequal_p(_variable, other._variable);
 }
 
 
 // OTHER
-DynPrec arbitrary::log2(const DynPrec& value) {
-    DynPrec result(mpfr_get_prec(value._variable));
+MPFR arbitrary::log2(const MPFR& value) {
+    MPFR result(mpfr_get_prec(value._variable));
     mpfr_log2(result._variable, value._variable, MPFR_RNDN);
     return result;
 }
 
-DynPrec arbitrary::abs(const DynPrec& value) {
-    DynPrec result(mpfr_get_prec(value._variable));
+MPFR arbitrary::abs(const MPFR& value) {
+    MPFR result(mpfr_get_prec(value._variable));
     mpfr_abs(result._variable, value._variable, MPFR_RNDN);
     return result;
 }
 
-DynPrec arbitrary::ceil(const DynPrec& value) {
-    DynPrec result(mpfr_get_prec(value._variable));
+MPFR arbitrary::ceil(const MPFR& value) {
+    MPFR result(mpfr_get_prec(value._variable));
     mpfr_ceil(result._variable, value._variable);
     return result;
 }
 
-DynPrec arbitrary::max(const DynPrec& a, const DynPrec& b) {
+MPFR arbitrary::max(const MPFR& a, const MPFR& b) {
     return a > b ? a : b;
 }
 
 
 // NEGATION
-DynPrec DynPrec::operator-() const {
-    DynPrec result(mpfr_get_prec(_variable));
+MPFR MPFR::operator-() const {
+    MPFR result(mpfr_get_prec(_variable));
     mpfr_neg(result._variable, _variable, MPFR_RNDN);
     return result;
 }
 
 
-double DynPrec::get_double() const {
+double MPFR::get_double() const {
     return mpfr_get_d(_variable, MPFR_RNDN);
 }
 
-long double DynPrec::get_long_double() const {
+long double MPFR::get_long_double() const {
     return mpfr_get_ld(_variable, MPFR_RNDN);
 }
 
-std::string DynPrec::get_string() const {
+std::string MPFR::get_string() const {
     char* str = nullptr;
 
     if (mpfr_asprintf(&str, "%.*Rg", static_cast<int>(mpfr_get_prec(_variable)), _variable) < 0) {
@@ -251,10 +251,10 @@ std::string DynPrec::get_string() const {
     return result;
 }
 
-long DynPrec::get_long() const {
+long MPFR::get_long() const {
     return mpfr_get_si(_variable, MPFR_RNDN);
 }
 
-DynPrec::~DynPrec() {
+MPFR::~MPFR() {
     mpfr_clear(_variable);
 }
