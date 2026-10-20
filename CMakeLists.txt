@@ -49,7 +49,7 @@ target_compile_options(mandelbrot PRIVATE
 
 # Benchmark executable
 add_executable(benchmark
-    benchmark/main.cpp
+    benchmarks/main.cpp
     ${COMMON_SOURCES}
 )
 
