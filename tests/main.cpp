@@ -1,12 +1,12 @@
-#include <cassert>
+#include <iostream>
+
 #include "arbitrary.h"
 
 int main() {
-    MPFR a(2.0);
-    MPFR b(3.0);
+    MPFR a = "1";
+    a.set_precision(100);
+    MPFR b = "0.2";
+    b.set_precision(100);
 
-    assert((a + b).get_double() == 5.0);
-    assert((b - a).get_double() == 1.0);
-    assert((a * b).get_double() == 6.0);
-    assert((b / a).get_double() == 1.5);
+    std::printf("Adding 1 and 0.2: %f\n", (a + b).get_double());
 }

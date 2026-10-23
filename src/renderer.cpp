@@ -111,6 +111,7 @@ std::vector<Pixel> calculate_fractal(Dimensions task) {
             task_queue.push(worker_task);
         }
     }
+
     task_queue_condition.notify_all();
 
     {
@@ -136,7 +137,9 @@ static void _calculator_worker() {
             task = task_queue.front();
             task_queue.pop();
         }
+
         calculate_region(task.dimensions, task.region, pixels);
+
         {
             std::lock_guard<std::mutex> lock(tasks_remaining_mutex);
             tasks_remaining--;
