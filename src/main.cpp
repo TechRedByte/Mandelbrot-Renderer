@@ -1,192 +1,68 @@
-#include <SDL3/SDL.h>
-#include <optional>
-#include <vector>
+#include <iostream>
+#include <string>
 
-#include "arbitrary.h"
-#include "renderer.h"
-#include "logger.h"
-#include "global.h"
+#include "cli.h"
+#include "ui.h"
 
-static SDL_Window *window = nullptr;
-static SDL_Renderer *renderer = nullptr;
-static SDL_Texture *texture = nullptr;
+enum class CliMode {
+    NONE = 0, IMAGE
+};
 
-static bool dragging = false;
-static int last_mouse_x;
-static int last_mouse_y;
-static Dimensions dimensions;
-static std::vector<Pixel> pixels(dimensions.width * dimensions.height);
+int main(int argc, char* argv[]) {
+    if (argc == 1) {
+        return render_ui();
+    } else {
+        CliMode mode = CliMode::NONE;
+        std::string output_name;
 
-static bool init_sdl(unsigned int width, unsigned int height);
-static void update_texture();
-static void update_renderer();
+        for (int i = 1; i < argc; i++) {
+            std::string arg = argv[i];
 
-int main() {
-    if (!init_sdl(dimensions.width, dimensions.height)) {
-        log_error("Failed to initialize SDL: %c", SDL_GetError());
+            if (arg == "--help") {
+                std::cout << "Help\n";
+                return 0;
+
+            } else if (arg == "--image-output") {
+                if (mode != CliMode::NONE) {
+                    std::cerr << "Error: An output mode has already been specified.\n";
+                    std::cerr << "Run 'mandelbrot --help' for usage information.\n";
+                    return 1;
+                }
+
+                if ((i + 1) >= argc) {
+                    std::cerr << "Error: '--image-output' requires a filename.\n";
+                    std::cerr << "Run 'mandelbrot --help' for usage information.\n";
+                    return 1;
+                }
+
+                mode = CliMode::IMAGE;
+                output_name = argv[i + 1];
+
+                if (output_name.empty()) {
+                    std::cerr << "Error: '--image-output' requires a filename.\n";
+                    std::cerr << "Run 'mandelbrot --help' for usage information.\n";
+                    return 1;
+                }
+                i++;
+
+            } else {
+                std::cerr << "Error: Unknown option '" << arg << "'.\n";
+                std::cerr << "Run 'mandelbrot --help' for usage information.\n";
+                return 1;
+            }
+        }
+
+        switch (mode) {
+            case CliMode::NONE: {
+                std::cerr << "Error: No output mode and name specified.\n";
+                std::cerr << "Run 'mandelbrot --help' for usage information.\n";
+                return 1;
+            }
+            case CliMode::IMAGE: {
+                return create_image(output_name);
+            }
+        }
+
         return 0;
     }
-    log_info("SDL initialized.");
-
-    initialize_workers(true);
-    log_info("Workers initialized.");
-
-    dimensions.update_precision(dimensions.scale);
-    assign_task(dimensions);
-
-    bool running = true;
-
-    while (running) {
-        SDL_Event event;
-
-        while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_EVENT_QUIT) {
-                running = false;
-            }
-
-            if (event.type == SDL_EVENT_WINDOW_RESIZED) {
-                dimensions.width = event.window.data1;
-                dimensions.height = event.window.data2;
-
-                pixels.resize(dimensions.width * dimensions.height);
-
-                assign_task(dimensions);
-            }
-
-            if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
-                if (event.button.button == SDL_BUTTON_LEFT) {
-                    dragging = true;
-                    last_mouse_x = event.button.x;
-                    last_mouse_y = event.button.y;
-                }
-            }
-
-            if (event.type == SDL_EVENT_MOUSE_MOTION) {
-                if (dragging) {
-                    int mouse_x = event.motion.x;
-                    int mouse_y = event.motion.y;
-
-                    MPFR mouse_delta_x = mouse_x - last_mouse_x;
-                    MPFR mouse_delta_y = mouse_y - last_mouse_y;
-
-                    dimensions.center_x -= mouse_delta_x * dimensions.scale;
-                    dimensions.center_y -= mouse_delta_y * dimensions.scale;
-
-                    last_mouse_x = mouse_x;
-                    last_mouse_y = mouse_y;
-
-                    assign_task(dimensions);
-                }
-            }
-
-            if (event.type == SDL_EVENT_MOUSE_BUTTON_UP) {
-                if (event.button.button == SDL_BUTTON_LEFT) {
-                    dragging = false;
-                }
-            }
-
-            if (event.type == SDL_EVENT_MOUSE_WHEEL) {
-                if (event.wheel.y > 0) { // Zooming in
-                    float zoom_factor = 0.8;
-
-                    MPFR new_scale = dimensions.scale * zoom_factor;
-
-                    dimensions.update_precision(new_scale);
-
-                    dimensions.center_x += (event.wheel.mouse_x - dimensions.width / 2.0) * dimensions.scale * (1.0 - zoom_factor);
-                    dimensions.center_y += (event.wheel.mouse_y - dimensions.height / 2.0) * dimensions.scale * (1.0 - zoom_factor);
-                    dimensions.scale = new_scale;
-
-                } else if (event.wheel.y < 0) { // Zooming out
-                    float zoom_factor = 1.25;
-
-                    MPFR new_scale = dimensions.scale * zoom_factor;
-
-                    dimensions.update_precision(new_scale);
-
-                    dimensions.center_x += (event.wheel.mouse_x - dimensions.width / 2.0) * dimensions.scale * (1.0 - zoom_factor);
-                    dimensions.center_y += (event.wheel.mouse_y - dimensions.height / 2.0) * dimensions.scale * (1.0 - zoom_factor);
-                    dimensions.scale = new_scale;
-                }
-
-                assign_task(dimensions);
-            }
-        }
-
-        if (auto result = return_result()) {
-            if (result->dimensions == dimensions) {
-                log_debug(
-                    "Rendered image at: x: %.15e, y: %.15e, scale: %.15e",
-                    dimensions.center_x.get_double(),
-                    dimensions.center_y.get_double(),
-                    dimensions.scale.get_double()
-                );
-
-                pixels = result->pixels;
-                update_texture();
-            }
-        }
-
-        update_renderer();
-        SDL_Delay(16);
-    }
-
-    log_info("Quitting...");
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    SDL_Quit();
-
-    return 0;
-}
-
-static void update_texture() {
-    SDL_DestroyTexture(texture);
-
-    texture = SDL_CreateTexture(
-        renderer,
-        SDL_PIXELFORMAT_RGB24,
-        SDL_TEXTUREACCESS_STREAMING,
-        dimensions.width,
-        dimensions.height
-    );
-
-    SDL_UpdateTexture(
-        texture,
-        nullptr,
-        pixels.data(),
-        dimensions.width * sizeof(Pixel)
-    );
-}
-
-static void update_renderer() {
-    SDL_RenderTexture(renderer, texture, nullptr, nullptr);
-    SDL_RenderPresent(renderer);
-}
-
-static bool init_sdl(unsigned int width, unsigned int height) {
-    if (!SDL_Init(SDL_INIT_VIDEO)) {
-        return false;
-    }
-
-    window = SDL_CreateWindow(
-        "Mandelbrot Renderer",
-        width,
-        height,
-        SDL_WINDOW_RESIZABLE
-    );
-
-    if (window == nullptr) {
-        SDL_Quit();
-        return false;
-    }
-
-    renderer = SDL_CreateRenderer(window, nullptr);
-
-    if (renderer == nullptr) {
-        SDL_DestroyWindow(window);
-        SDL_Quit();
-        return false;
-    }
-
-    return true;
 }

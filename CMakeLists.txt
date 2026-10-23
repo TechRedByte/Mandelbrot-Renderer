@@ -10,7 +10,7 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(SDL3 REQUIRED sdl3)
 pkg_check_modules(MPFR REQUIRED mpfr)
 
-# Shared source files
+# Source files
 set(COMMON_SOURCES
     src/logger.cpp
     src/fractal.cpp
@@ -29,6 +29,8 @@ set(COMMON_COMPILE_OPTIONS
 # Main renderer
 add_executable(mandelbrot
     src/main.cpp
+    src/ui.cpp
+    src/cli.cpp
     ${COMMON_SOURCES}
 )
 
