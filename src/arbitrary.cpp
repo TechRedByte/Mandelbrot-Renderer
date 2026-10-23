@@ -33,8 +33,8 @@ MPFR::MPFR(const char* value) {
     mpfr_init2(_variable, precision);
     if (mpfr_set_str(_variable, value, 10, MPFR_RNDN)) {
         mpfr_clear(_variable);
-        log_error("Failed to construct DynPrec variable: %s", value);
-        throw std::invalid_argument("Invalid number for DynPrec");
+        log_error("Failed to construct MPFR variable from string: %s", value);
+        throw std::invalid_argument("Invalid number for MPFR");
     }
 }
 
@@ -62,7 +62,7 @@ MPFR::MPFR(mpfr_prec_t precision) {
     if (precision >= MPFR_PREC_MIN && precision <= MPFR_PREC_MAX) {
         mpfr_init2(_variable, precision);
     } else {
-        log_error("Failed to construct DynPrec variable: %ld", static_cast<long>(precision));
+        log_error("Failed to construct MPFR variable with precision: %ld", static_cast<long>(precision));
         throw std::invalid_argument("Invalid precision for DynPrec");
     }
 }
@@ -76,14 +76,15 @@ void MPFR::set_precision(mpfr_prec_t precision) {
     if (precision >= MPFR_PREC_MIN && precision <= MPFR_PREC_MAX) {
         mpfr_prec_round(_variable, precision, MPFR_RNDN);
     } else {
-        log_error("Failed to construct DynPrec variable: %ld", static_cast<long>(precision));
-        throw std::invalid_argument("Invalid precision for DynPrec");
+        log_error("Failed to set precision for MPFR variable: %ld", static_cast<long>(precision));
+        throw std::invalid_argument("Invalid precision for MPFR");
     }
 }
 
 
 // ASSIGNMENT
 MPFR& MPFR::operator=(const MPFR& other) {
+    set_precision(mpfr_get_prec(other._variable));
     mpfr_set(_variable, other._variable, MPFR_RNDN);
     return *this;
 }
@@ -241,8 +242,8 @@ std::string MPFR::get_string() const {
     char* str = nullptr;
 
     if (mpfr_asprintf(&str, "%.*Rg", static_cast<int>(mpfr_get_prec(_variable)), _variable) < 0) {
-        log_error("Failed to convert DynPrec to string");
-        throw std::runtime_error("Failed to convert DynPrec to string");
+        log_error("Failed to convert MPFR to string");
+        throw std::runtime_error("Failed to convert MPFR to string");
     }
 
     std::string result(str);
