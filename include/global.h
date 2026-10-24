@@ -7,7 +7,7 @@
 #include "arbitrary.h"
 #include "logger.h"
 
-constexpr unsigned int MAX_ITERATIONS = 256;
+constexpr unsigned int MAX_ITERATIONS = 1000;
 constexpr unsigned int NUM_REGIONS = 361; // Must be a whole square number
 constexpr double PALETTE_DENSITY = 255;
 constexpr mpfr_prec_t GUARD_BITS = 4;
