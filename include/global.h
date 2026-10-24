@@ -10,7 +10,7 @@
 constexpr unsigned int MAX_ITERATIONS = 256;
 constexpr unsigned int NUM_REGIONS = 361; // Must be a whole square number
 constexpr double PALETTE_DENSITY = 255;
-constexpr mpfr_prec_t GUARD_BITS = 0;
+constexpr mpfr_prec_t GUARD_BITS = 4;
 
 struct Pixel {
     uint8_t r;
