@@ -7,7 +7,7 @@
 
 struct FractalSettings {
     unsigned int max_iterations = 1000;
-    double palette_density = 60;
+    double palette_density = 100;
 
     bool operator==(const FractalSettings &other) const {
         return max_iterations == other.max_iterations &&
