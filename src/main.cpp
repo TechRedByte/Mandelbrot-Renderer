@@ -71,6 +71,25 @@ int main(int argc, char* argv[]) {
                 settings.max_iterations = iterations;
                 i++;
 
+            } else if (arg == "--palette-density") {
+                if ((i + 1) >= argc) {
+                    std::cerr << "Error: '--palette-density' requires a valid number.\n";
+                    std::cerr << "Run 'mandelbrot --help' for usage information.\n";
+                    return 1;
+                }
+
+                std::string_view value = argv[i + 1];
+                double palette_density{};
+                auto [end, error] = std::from_chars(value.data(), value.data() + value.size(), palette_density);
+
+                if (error != std::errc{} || end != value.data() + value.size()) {
+                    std::cerr << "Error: '--palette-density' requires a valid number.\n";
+                    return 1;
+                }
+
+                settings.palette_density = palette_density;
+                i++;
+
             } else if (arg == "--width") {
                 if ((i + 1) >= argc) {
                     std::cerr << "Error: '--width' requires a valid number.\n";
