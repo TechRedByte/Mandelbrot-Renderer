@@ -117,8 +117,7 @@ int main(int argc, char* argv[]) {
                 }
 
                 MPFR scale = argv[i + 1];
-                dimension.update_precision(scale);
-                dimension.scale = scale;
+                dimension.update_view(scale, dimension.center_x, dimension.center_y);
                 i++;
 
             } else {
@@ -127,8 +126,6 @@ int main(int argc, char* argv[]) {
                 return 1;
             }
         }
-
-        dimension.update_precision(dimension.scale);
 
         switch (mode) {
             case CliMode::NONE: {

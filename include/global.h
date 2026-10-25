@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <stdexcept>
 #include <cstdint>
 
 #include "arbitrary.h"
@@ -23,24 +24,32 @@ struct Dimensions {
     MPFR center_y = 0.0;
     mpfr_prec_t precision = MPFR_PREC_MIN;
 
-    void update_precision(MPFR& new_scale) {
+    void update_view(const MPFR &new_scale, const MPFR &new_center_x, const MPFR &new_center_y) {
         MPFR magnitude = arbitrary::max(
-            arbitrary::max(arbitrary::abs(center_x),
-            arbitrary::abs(center_y)),
-            new_scale
+            arbitrary::max(
+                arbitrary::abs(new_center_x),
+                arbitrary::abs(new_center_y)
+            ),
+            arbitrary::abs(new_scale)
         );
 
-        mpfr_prec_t new_precision = arbitrary::ceil(arbitrary::log2(magnitude / new_scale)).get_long() + GUARD_BITS;
+        mpfr_prec_t new_precision = arbitrary::ceil(arbitrary::log2(magnitude / arbitrary::abs(new_scale))).get_long() + GUARD_BITS;
 
         new_precision = std::max(new_precision, static_cast<mpfr_prec_t>(MPFR_PREC_MIN));
 
         log_debug("New precision: %ld", static_cast<long>(new_precision));
 
-        if (new_precision <= MPFR_PREC_MAX) {
+        scale = new_scale;
+        center_x = new_center_x;
+        center_y = new_center_y;
+
+        if (new_precision >= MPFR_PREC_MIN && new_precision <= MPFR_PREC_MAX) {
             scale.set_precision(new_precision);
             center_x.set_precision(new_precision);
             center_y.set_precision(new_precision);
             precision = new_precision;
+        } else {
+            throw std::invalid_argument("Invalid precision for MPFR");
         }
     }
 

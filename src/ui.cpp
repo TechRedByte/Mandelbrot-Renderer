@@ -32,7 +32,7 @@ int render_ui() {
     initialize_workers(true);
     log_info("Workers initialized.");
 
-    dimensions.update_precision(dimensions.scale);
+    dimensions.update_view(dimensions.scale, dimensions.center_x, dimensions.center_y);
     assign_task(dimensions, settings);
 
     bool running = true;
@@ -88,28 +88,18 @@ int render_ui() {
             }
 
             if (event.type == SDL_EVENT_MOUSE_WHEEL) {
+                float zoom_factor;
                 if (event.wheel.y > 0) { // Zooming in
-                    float zoom_factor = 0.8;
-
-                    MPFR new_scale = dimensions.scale * zoom_factor;
-
-                    dimensions.update_precision(new_scale);
-
-                    dimensions.center_x += (event.wheel.mouse_x - dimensions.width / 2.0) * dimensions.scale * (1.0 - zoom_factor);
-                    dimensions.center_y += (event.wheel.mouse_y - dimensions.height / 2.0) * dimensions.scale * (1.0 - zoom_factor);
-                    dimensions.scale = new_scale;
-
+                    zoom_factor = 0.8;
                 } else if (event.wheel.y < 0) { // Zooming out
-                    float zoom_factor = 1.25;
-
-                    MPFR new_scale = dimensions.scale * zoom_factor;
-
-                    dimensions.update_precision(new_scale);
-
-                    dimensions.center_x += (event.wheel.mouse_x - dimensions.width / 2.0) * dimensions.scale * (1.0 - zoom_factor);
-                    dimensions.center_y += (event.wheel.mouse_y - dimensions.height / 2.0) * dimensions.scale * (1.0 - zoom_factor);
-                    dimensions.scale = new_scale;
+                    zoom_factor = 1.25;
                 }
+
+                MPFR new_scale = dimensions.scale * zoom_factor;
+                MPFR new_center_x = dimensions.center_x + (event.wheel.mouse_x - dimensions.width / 2.0) * dimensions.scale * (1.0 - zoom_factor);
+                MPFR new_center_y = dimensions.center_y + (event.wheel.mouse_y - dimensions.height / 2.0) * dimensions.scale * (1.0 - zoom_factor);
+
+                dimensions.update_view(new_scale, new_center_x, new_center_y);
 
                 assign_task(dimensions, settings);
             }
@@ -118,10 +108,10 @@ int render_ui() {
         if (auto result = return_result()) {
             if (result->dimensions == dimensions && result->settings == settings) {
                 log_debug(
-                    "Rendered image at: x: %.15e, y: %.15e, scale: %.15e",
-                    dimensions.center_x.get_double(),
-                    dimensions.center_y.get_double(),
-                    dimensions.scale.get_double()
+                    "Rendered image at: x: %s, y: %s, scale: %s",
+                    dimensions.center_x.get_string().c_str(),
+                    dimensions.center_y.get_string().c_str(),
+                    dimensions.scale.get_string().c_str()
                 );
 
                 pixels = result->pixels;

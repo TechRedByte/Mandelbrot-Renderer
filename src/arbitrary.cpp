@@ -241,7 +241,7 @@ long double MPFR::get_long_double() const {
 std::string MPFR::get_string() const {
     char* str = nullptr;
 
-    if (mpfr_asprintf(&str, "%.*Rg", static_cast<int>(mpfr_get_prec(_variable)), _variable) < 0) {
+    if (mpfr_asprintf(&str, "%.*Rf", static_cast<int>(mpfr_get_prec(_variable)), _variable) < 0) {
         log_error("Failed to convert MPFR to string");
         throw std::runtime_error("Failed to convert MPFR to string");
     }
