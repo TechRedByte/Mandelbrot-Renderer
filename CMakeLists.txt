@@ -68,7 +68,7 @@ target_compile_options(benchmark PRIVATE
     ${COMMON_COMPILE_OPTIONS}
 )
 
-# DynPrec tests
+# Tests
 add_executable(test
     tests/main.cpp
     ${COMMON_SOURCES}
