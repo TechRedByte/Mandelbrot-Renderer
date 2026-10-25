@@ -18,7 +18,7 @@ static Result result;
 static bool result_available = false;
 
 static std::condition_variable task_available_condition;
-static Dimensions task_buffer;
+static Dimensions dimensions_buffer;
 static FractalSettings settings_buffer;
 static bool task_available = false;
 
@@ -50,10 +50,10 @@ void initialize_workers(bool asynchronous) {
     }
 }
 
-void assign_task(const Dimensions &task, const FractalSettings &settings) {
+void assign_task(const Dimensions &dimensions, const FractalSettings &settings) {
     {
         std::lock_guard<std::mutex> lock(result_mutex);
-        task_buffer = task;
+        dimensions_buffer = dimensions;
         settings_buffer = settings;
         task_available = true;
     }
@@ -72,7 +72,7 @@ std::optional<Result> return_result() {
 
 static void _worker() {
     while (true) {
-        Dimensions task;
+        Dimensions dimensions;
         FractalSettings settings;
         {
             std::unique_lock<std::mutex> lock(result_mutex);
@@ -81,16 +81,16 @@ static void _worker() {
                 return task_available;
             });
 
-            task = task_buffer;
+            dimensions = dimensions_buffer;
             settings = settings_buffer;
             task_available = false;
         }
 
-        std::vector<Pixel> result_buffer = calculate_fractal(task, settings);
+        std::vector<Pixel> result_buffer = calculate_fractal(dimensions, settings);
 
         {
             std::lock_guard<std::mutex> lock(result_mutex);
-            result.dimensions = task;
+            result.dimensions = dimensions;
             result.settings = settings;
             result.pixels = std::move(result_buffer);
             result_available = true;
@@ -98,23 +98,23 @@ static void _worker() {
     }
 }
 
-std::vector<Pixel> calculate_fractal(const Dimensions &task, const FractalSettings &settings) {
+std::vector<Pixel> calculate_fractal(const Dimensions &dimensions, const FractalSettings &settings) {
     pixels.clear();
-    pixels.resize(task.width * task.height);
+    pixels.resize(dimensions.width * dimensions.height);
     RegionTask worker_task;
 
     worker_task.settings = settings;
-    worker_task.dimensions = task;
+    worker_task.dimensions = dimensions;
     tasks_remaining = NUM_REGIONS;
     for (unsigned int region_y = 0; region_y < regions_per_side; region_y++) {
         for (unsigned int region_x = 0; region_x < regions_per_side; region_x++) {
             std::lock_guard<std::mutex> lock(task_queue_mutex);
 
-            worker_task.region.start_x = task.width * region_x / regions_per_side;
-            worker_task.region.end_x = task.width * (region_x + 1) / regions_per_side;
+            worker_task.region.start_x = dimensions.width * region_x / regions_per_side;
+            worker_task.region.end_x = dimensions.width * (region_x + 1) / regions_per_side;
 
-            worker_task.region.start_y = task.height * region_y / regions_per_side;
-            worker_task.region.end_y = task.height * (region_y + 1) / regions_per_side;
+            worker_task.region.start_y = dimensions.height * region_y / regions_per_side;
+            worker_task.region.end_y = dimensions.height * (region_y + 1) / regions_per_side;
 
             task_queue.push(worker_task);
         }
@@ -134,7 +134,7 @@ std::vector<Pixel> calculate_fractal(const Dimensions &task, const FractalSettin
 
 static void _calculator_worker() {
     while (true) {
-        RegionTask task;
+        RegionTask region_task;
         {
             std::unique_lock<std::mutex> lock(task_queue_mutex);
 
@@ -142,11 +142,11 @@ static void _calculator_worker() {
                 return !task_queue.empty();
             });
 
-            task = task_queue.front();
+            region_task = task_queue.front();
             task_queue.pop();
         }
 
-        calculate_region(task.dimensions, task.region, task.settings, pixels);
+        calculate_region(region_task.dimensions, region_task.region, region_task.settings, pixels);
 
         {
             std::lock_guard<std::mutex> lock(tasks_remaining_mutex);

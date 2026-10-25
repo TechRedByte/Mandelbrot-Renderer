@@ -22,6 +22,6 @@ struct Result {
 };
 
 void initialize_workers(bool asynchronous);
-void assign_task(const Dimensions &task, const FractalSettings &settings);
+void assign_task(const Dimensions &dimensions, const FractalSettings &settings);
 std::optional<Result> return_result();
-std::vector<Pixel> calculate_fractal(const Dimensions &task, const FractalSettings &settings);
+std::vector<Pixel> calculate_fractal(const Dimensions &dimensions, const FractalSettings &settings);
