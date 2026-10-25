@@ -5,10 +5,10 @@
 
 #include "arbitrary.h"
 #include "renderer.h"
-#include "cli.h"
+#include "headless.h"
 #include "ui.h"
 
-enum class CliMode {
+enum class HeadlessMode {
     NONE = 0, IMAGE
 };
 
@@ -16,7 +16,7 @@ int main(int argc, char* argv[]) {
     if (argc == 1) {
         return render_ui();
     } else {
-        CliMode mode = CliMode::NONE;
+        HeadlessMode mode = HeadlessMode::NONE;
         Dimensions dimension;
         FractalSettings settings;
         std::string output_name;
@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
                 return 0;
 
             } else if (arg == "--image-output") {
-                if (mode != CliMode::NONE) {
+                if (mode != HeadlessMode::NONE) {
                     std::cerr << "Error: An output mode has already been specified.\n";
                     std::cerr << "Run 'mandelbrot --help' for usage information.\n";
                     return 1;
@@ -41,7 +41,7 @@ int main(int argc, char* argv[]) {
                     return 1;
                 }
 
-                mode = CliMode::IMAGE;
+                mode = HeadlessMode::IMAGE;
                 output_name = argv[i + 1];
 
                 if (output_name.empty()) {
@@ -128,12 +128,12 @@ int main(int argc, char* argv[]) {
         }
 
         switch (mode) {
-            case CliMode::NONE: {
+            case HeadlessMode::NONE: {
                 std::cerr << "Error: No output mode and name specified.\n";
                 std::cerr << "Run 'mandelbrot --help' for usage information.\n";
                 return 1;
             }
-            case CliMode::IMAGE: {
+            case HeadlessMode::IMAGE: {
                 create_image(output_name, dimension, settings);
             }
         }

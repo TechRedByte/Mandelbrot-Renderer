@@ -5,8 +5,8 @@
 #include <string>
 
 #include "renderer.h"
+#include "headless.h"
 #include "global.h"
-#include "cli.h"
 
 void create_image(const std::string &output_name, const Dimensions &dimension, const FractalSettings &settings) {
     initialize_workers(false);

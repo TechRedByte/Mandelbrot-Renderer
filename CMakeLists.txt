@@ -30,7 +30,7 @@ set(COMMON_COMPILE_OPTIONS
 add_executable(mandelbrot
     src/main.cpp
     src/ui.cpp
-    src/cli.cpp
+    src/headless.cpp
     ${COMMON_SOURCES}
 )
 
