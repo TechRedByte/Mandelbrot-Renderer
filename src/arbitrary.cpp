@@ -63,7 +63,7 @@ MPFR::MPFR(mpfr_prec_t precision) {
         mpfr_init2(_variable, precision);
     } else {
         log_error("Failed to construct MPFR variable with precision: %ld", static_cast<long>(precision));
-        throw std::invalid_argument("Invalid precision for DynPrec");
+        throw std::invalid_argument("Invalid precision for MPFR");
     }
 }
 
