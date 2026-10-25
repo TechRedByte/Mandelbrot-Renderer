@@ -17,7 +17,6 @@ static int last_mouse_y;
 static Dimensions dimensions;
 static FractalSettings settings;
 static std::vector<Pixel> pixels(dimensions.width * dimensions.height);
-static unsigned int task_id = 0;
 
 static bool _init_sdl(unsigned int width, unsigned int height);
 static void _update_texture();
@@ -34,7 +33,7 @@ int render_ui() {
     log_info("Workers initialized.");
 
     dimensions.update_precision(dimensions.scale);
-    assign_task(dimensions, settings, task_id);
+    assign_task(dimensions, settings);
 
     bool running = true;
 
@@ -53,8 +52,7 @@ int render_ui() {
 
                 pixels.resize(dimensions.width * dimensions.height);
 
-                task_id++;
-                assign_task(dimensions, settings, task_id);
+                assign_task(dimensions, settings);
             }
 
             if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
@@ -79,8 +77,7 @@ int render_ui() {
                     last_mouse_x = mouse_x;
                     last_mouse_y = mouse_y;
 
-                    task_id++;
-                    assign_task(dimensions, settings, task_id);
+                    assign_task(dimensions, settings);
                 }
             }
 
@@ -114,13 +111,12 @@ int render_ui() {
                     dimensions.scale = new_scale;
                 }
 
-                task_id++;
-                assign_task(dimensions, settings, task_id);
+                assign_task(dimensions, settings);
             }
         }
 
         if (auto result = return_result()) {
-            if (result->task_id == task_id) {
+            if (result->dimensions == dimensions && result->settings == settings) {
                 log_debug(
                     "Rendered image at: x: %.15e, y: %.15e, scale: %.15e",
                     dimensions.center_x.get_double(),

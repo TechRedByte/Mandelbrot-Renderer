@@ -34,7 +34,6 @@ const unsigned int regions_per_side = std::sqrt(NUM_REGIONS);
 static std::vector<std::thread> calculator_threads;
 static std::thread worker_thread;
 static std::vector<Pixel> pixels;
-static unsigned int _task_id;
 
 static void _worker();
 static void _calculator_worker();
@@ -51,10 +50,9 @@ void initialize_workers(bool asynchronous) {
     }
 }
 
-void assign_task(const Dimensions &task, const FractalSettings &settings, unsigned int task_id) {
+void assign_task(const Dimensions &task, const FractalSettings &settings) {
     {
         std::lock_guard<std::mutex> lock(result_mutex);
-        _task_id = task_id;
         task_buffer = task;
         settings_buffer = settings;
         task_available = true;
@@ -92,7 +90,8 @@ static void _worker() {
 
         {
             std::lock_guard<std::mutex> lock(result_mutex);
-            result.task_id = _task_id;
+            result.dimensions = task;
+            result.settings = settings;
             result.pixels = std::move(result_buffer);
             result_available = true;
         }
