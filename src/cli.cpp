@@ -1,17 +1,17 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
 
+#include <stdexcept>
 #include <string>
 
 #include "renderer.h"
 #include "global.h"
 #include "cli.h"
 
-int create_image(const std::string &output_name) {
+void create_image(const std::string &output_name, const Dimensions &dimension, const FractalSettings &settings) {
     initialize_workers(false);
-    Dimensions dimension;
-    std::vector<Pixel> pixel = calculate_fractal(dimension);
-    if (stbi_write_png(
+    std::vector<Pixel> pixel = calculate_fractal(dimension, settings);
+    if (!stbi_write_png(
         output_name.c_str(),
         dimension.width,
         dimension.height,
@@ -19,8 +19,6 @@ int create_image(const std::string &output_name) {
         pixel.data(),
         (dimension.width * sizeof(Pixel))
     )) {
-        return 0;
-    } else {
-        return 1;
+        throw std::runtime_error("Failed to write png");
     }
 }

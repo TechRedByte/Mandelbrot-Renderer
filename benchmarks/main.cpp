@@ -10,6 +10,8 @@
 #include "renderer.h"
 #include "global.h"
 
+FractalSettings settings;
+
 double mean(const std::vector<uint64_t>& durations);
 double median(const std::vector<uint64_t>& durations);
 double standard_deviation(const std::vector<uint64_t>& durations);
@@ -78,7 +80,7 @@ int main() {
         std::vector<uint64_t> durations;
         for (unsigned int b = 0; b < 10; b++) {
             auto start = std::chrono::steady_clock::now();
-            calculate_fractal(cases[i]);
+            calculate_fractal(cases[i], settings);
             auto end = std::chrono::steady_clock::now();
             durations.push_back(std::chrono::duration_cast<std::chrono::microseconds>(end - start).count());
         }

@@ -1,7 +1,7 @@
 #include <vector>
 #include <cmath>
 
-#include "global.h"
+#include "renderer.h"
 #include "palette.h"
 
 const std::vector<Pixel> GRAY_SCALE {
@@ -9,10 +9,10 @@ const std::vector<Pixel> GRAY_SCALE {
     {255, 255, 255}
 };
 
-Pixel get_color(double smooth_iteration) {
-    double palette_position = std::fmod(smooth_iteration, PALETTE_DENSITY)
+Pixel get_color(double iteration, const FractalSettings &settings) {
+    double palette_position = std::fmod(iteration, settings.palette_density)
     * GRAY_SCALE.size()
-    / PALETTE_DENSITY;
+    / settings.palette_density;
 
     double integer_part;
     double fractional_part = std::modf(palette_position, &integer_part);

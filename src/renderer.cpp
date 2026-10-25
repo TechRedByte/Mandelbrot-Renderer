@@ -10,6 +10,7 @@
 struct RegionTask {
     Dimensions dimensions;
     Region region;
+    FractalSettings settings;
 };
 
 static std::mutex result_mutex;
@@ -18,6 +19,7 @@ static bool result_available = false;
 
 static std::condition_variable task_available_condition;
 static Dimensions task_buffer;
+static FractalSettings settings_buffer;
 static bool task_available = false;
 
 static std::mutex task_queue_mutex;
@@ -32,6 +34,7 @@ const unsigned int regions_per_side = std::sqrt(NUM_REGIONS);
 static std::vector<std::thread> calculator_threads;
 static std::thread worker_thread;
 static std::vector<Pixel> pixels;
+static unsigned int _task_id;
 
 static void _worker();
 static void _calculator_worker();
@@ -48,10 +51,12 @@ void initialize_workers(bool asynchronous) {
     }
 }
 
-void assign_task(Dimensions task) {
+void assign_task(const Dimensions &task, const FractalSettings &settings, unsigned int task_id) {
     {
         std::lock_guard<std::mutex> lock(result_mutex);
+        _task_id = task_id;
         task_buffer = task;
+        settings_buffer = settings;
         task_available = true;
     }
     task_available_condition.notify_one();
@@ -70,6 +75,7 @@ std::optional<Result> return_result() {
 static void _worker() {
     while (true) {
         Dimensions task;
+        FractalSettings settings;
         {
             std::unique_lock<std::mutex> lock(result_mutex);
 
@@ -78,26 +84,29 @@ static void _worker() {
             });
 
             task = task_buffer;
+            settings = settings_buffer;
             task_available = false;
         }
 
-        std::vector<Pixel> result_buffer = calculate_fractal(task);
+        std::vector<Pixel> result_buffer = calculate_fractal(task, settings);
+
         {
             std::lock_guard<std::mutex> lock(result_mutex);
-            result.dimensions = task;
+            result.task_id = _task_id;
             result.pixels = std::move(result_buffer);
             result_available = true;
         }
     }
 }
 
-std::vector<Pixel> calculate_fractal(Dimensions task) {
+std::vector<Pixel> calculate_fractal(const Dimensions &task, const FractalSettings &settings) {
     pixels.clear();
     pixels.resize(task.width * task.height);
     RegionTask worker_task;
 
-    tasks_remaining = NUM_REGIONS;
+    worker_task.settings = settings;
     worker_task.dimensions = task;
+    tasks_remaining = NUM_REGIONS;
     for (unsigned int region_y = 0; region_y < regions_per_side; region_y++) {
         for (unsigned int region_x = 0; region_x < regions_per_side; region_x++) {
             std::lock_guard<std::mutex> lock(task_queue_mutex);
@@ -138,7 +147,7 @@ static void _calculator_worker() {
             task_queue.pop();
         }
 
-        calculate_region(task.dimensions, task.region, pixels);
+        calculate_region(task.dimensions, task.region, task.settings, pixels);
 
         {
             std::lock_guard<std::mutex> lock(tasks_remaining_mutex);

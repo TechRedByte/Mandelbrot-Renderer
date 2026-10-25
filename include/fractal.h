@@ -11,4 +11,4 @@ struct Region {
     unsigned int end_y;
 };
 
-void calculate_region(const Dimensions &dimensions, const Region &region, std::vector<Pixel> &pixels);
+void calculate_region(const Dimensions &dimensions, const Region &region, const FractalSettings &settings, std::vector<Pixel> &pixels);

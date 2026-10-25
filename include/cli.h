@@ -2,4 +2,4 @@
 
 #include <string>
 
-int create_image(const std::string &output_name);
+void create_image(const std::string &output_name, const Dimensions &dimension, const FractalSettings &settings);

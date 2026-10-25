@@ -1,5 +1,5 @@
 #pragma once
 
-#include "global.h"
+#include "renderer.h"
 
-Pixel get_color(double smooth_iteration);
+Pixel get_color(double iteration, const FractalSettings &settings);

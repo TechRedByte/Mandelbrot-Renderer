@@ -2,14 +2,11 @@
 
 #include <algorithm>
 #include <cstdint>
-#include <vector>
 
 #include "arbitrary.h"
 #include "logger.h"
 
-constexpr unsigned int MAX_ITERATIONS = 1000;
 constexpr unsigned int NUM_REGIONS = 361; // Must be a whole square number
-constexpr double PALETTE_DENSITY = 255;
 constexpr mpfr_prec_t GUARD_BITS = 4;
 
 struct Pixel {
@@ -28,7 +25,8 @@ struct Dimensions {
 
     void update_precision(MPFR& new_scale) {
         MPFR magnitude = arbitrary::max(
-            arbitrary::max(arbitrary::abs(center_x), arbitrary::abs(center_y)),
+            arbitrary::max(arbitrary::abs(center_x),
+            arbitrary::abs(center_y)),
             new_scale
         );
 
@@ -53,9 +51,4 @@ struct Dimensions {
             center_x == other.center_x &&
             center_y == other.center_y;
     }
-};
-
-struct Result {
-    Dimensions dimensions;
-    std::vector<Pixel> pixels;
 };
