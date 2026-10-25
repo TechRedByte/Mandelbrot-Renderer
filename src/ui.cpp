@@ -32,7 +32,7 @@ int render_ui() {
     initialize_workers(true);
     log_info("Workers initialized.");
 
-    dimensions.update_view(dimensions.scale, dimensions.center_x, dimensions.center_y);
+    dimensions.update_precision();
     assign_task(dimensions, settings);
 
     bool running = true;
@@ -95,11 +95,11 @@ int render_ui() {
                     zoom_factor = 1.25;
                 }
 
-                MPFR new_scale = dimensions.scale * zoom_factor;
-                MPFR new_center_x = dimensions.center_x + (event.wheel.mouse_x - dimensions.width / 2.0) * dimensions.scale * (1.0 - zoom_factor);
-                MPFR new_center_y = dimensions.center_y + (event.wheel.mouse_y - dimensions.height / 2.0) * dimensions.scale * (1.0 - zoom_factor);
+                dimensions.center_x = dimensions.center_x + (event.wheel.mouse_x - dimensions.width / 2.0) * dimensions.scale * (1.0 - zoom_factor);
+                dimensions.center_y = dimensions.center_y + (event.wheel.mouse_y - dimensions.height / 2.0) * dimensions.scale * (1.0 - zoom_factor);
+                dimensions.scale = dimensions.scale * zoom_factor;
 
-                dimensions.update_view(new_scale, new_center_x, new_center_y);
+                dimensions.update_precision();
 
                 assign_task(dimensions, settings);
             }

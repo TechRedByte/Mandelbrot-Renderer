@@ -29,7 +29,7 @@ int main() {
         .center_x = -0.75,
         .center_y = 0.0
     };
-    cases[0].update_view(cases[0].scale, cases[0].center_x, cases[0].center_y);
+    cases[0].update_precision();
 
     // High resolution
     cases[1] = {
@@ -39,7 +39,7 @@ int main() {
         .center_x = -0.75,
         .center_y = 0.0
     };
-    cases[1].update_view(cases[1].scale, cases[1].center_x, cases[1].center_y);
+    cases[1].update_precision();
 
     // Boundary-heavy
     cases[2] = {
@@ -49,7 +49,7 @@ int main() {
         .center_x = -0.743643887037151,
         .center_y = 0.131825904205330
     };
-    cases[2].update_view(cases[2].scale, cases[2].center_x, cases[2].center_y);
+    cases[2].update_precision();
 
     // Deep zoom
     cases[3] = {
@@ -59,7 +59,7 @@ int main() {
         .center_x = -0.743643887037151,
         .center_y = 0.131825904205330
     };
-    cases[3].update_view(cases[3].scale, cases[3].center_x, cases[3].center_y);
+    cases[3].update_precision();
 
     // Small image
     cases[4] = {
@@ -69,7 +69,7 @@ int main() {
         .center_x = -0.75,
         .center_y = 0.0
     };
-    cases[4].update_view(cases[4].scale, cases[4].center_x, cases[4].center_y);
+    cases[4].update_precision();
 
     std::vector<double> means;
     std::vector<double> medians;

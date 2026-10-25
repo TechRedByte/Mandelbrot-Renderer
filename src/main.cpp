@@ -116,8 +116,27 @@ int main(int argc, char* argv[]) {
                     return 1;
                 }
 
-                MPFR scale = argv[i + 1];
-                dimension.update_view(scale, dimension.center_x, dimension.center_y);
+                dimension.scale = argv[i + 1];
+                i++;
+
+            } else if (arg == "--center-x") {
+                if ((i + 1) >= argc) {
+                    std::cerr << "Error: '--center-x' requires a valid number.\n";
+                    std::cerr << "Run 'mandelbrot --help' for usage information.\n";
+                    return 1;
+                }
+
+                dimension.center_x = argv[i + 1];
+                i++;
+
+            } else if (arg == "--center-y") {
+                if ((i + 1) >= argc) {
+                    std::cerr << "Error: '--center-y' requires a valid number.\n";
+                    std::cerr << "Run 'mandelbrot --help' for usage information.\n";
+                    return 1;
+                }
+
+                dimension.center_y = argv[i + 1];
                 i++;
 
             } else {
@@ -126,6 +145,8 @@ int main(int argc, char* argv[]) {
                 return 1;
             }
         }
+
+        dimension.update_precision();
 
         switch (mode) {
             case HeadlessMode::NONE: {
